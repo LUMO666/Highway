@@ -29,5 +29,4 @@ setup(
         "Operating System :: OS Independent",
     ],
     keywords="multi-agent reinforcement learning platform pytorch",
-    python_requires='<=3.7',
 )

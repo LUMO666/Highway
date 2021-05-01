@@ -15,7 +15,7 @@ class ValueIterationAgent(AbstractAgent):
             self.mdp = env.mdp
         elif not self.finite_mdp:
             try:
-                print("vid", vehicle_id)
+                #print("vid", vehicle_id)
                 self.mdp = env.unwrapped.to_finite_mdp(vehicle_id)
             except AttributeError:
                 raise TypeError("Environment must be of type finite_mdp.envs.finite_mdp.FiniteMDPEnv or handle a "
