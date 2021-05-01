@@ -1,0 +1,5 @@
+1、defender回朔10帧，去掉attacker，观察defender的轨迹是否变化很大，如果变化不大则奖励attacker；
+
+2、attacker这次攻击了，但是并不自然回朔20帧，t-20到t-10,来进行轨迹预测t-10到t，如果attacker的预测轨迹和实际轨迹的差别；
+
+3、接着2来，同时考虑t-10到t的defender的轨迹，来判断交叠，有没有给defender留出足够的反映时间，也就是attacker的行为合不合法；

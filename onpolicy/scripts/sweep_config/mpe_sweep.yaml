@@ -1,0 +1,58 @@
+program: train/train_mpe.py
+project: sweep_MPE
+name: simple_spread
+command:
+  - ${env}
+  - python3
+  - ${program}
+  - ${args}
+method: grid
+metric:
+  goal: maximize
+  name: average_episode_rewards
+parameters:
+  env_name:
+    distribution: constant
+    value: "MPE"
+  scenario_name:
+    distribution: constant
+    value: "simple_spread"
+  algorithm_name:
+    distribution: constant
+    value: "rmappo"
+  experiment_name:
+    distribution: constant
+    value: "rmappo_mpe_ablation_epoch"
+  num_agents:
+    distribution: constant
+    value: 3
+  num_landmarks:
+    distribution: constant
+    value: 3
+  seed:
+    distribution: categorical
+    values: [1, 2, 3, 4, 5]
+  n_rollout_threads:
+    distribution: constant
+    value: 128
+  data_chunk_length:
+    distribution: constant
+    value: 10
+  num_env_steps:
+    distribution: constant
+    value: 20000000
+  episode_length:
+    distribution: constant
+    value: 25
+  num_mini_batch:
+    distribution: constant
+    value: 1 
+  gain:
+    distribution: constant
+    value: 0.01
+  lr:
+    distribution: constant
+    value: 0.0007
+  ppo_epoch:
+    distribution: categorical
+    values: [5, 10, 15, 20]

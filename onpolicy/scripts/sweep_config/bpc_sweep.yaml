@@ -1,0 +1,66 @@
+program: train/train_hns.py
+project: sweep_BoxLocking
+name: boxlocking
+command:
+  - ${env}
+  - python3
+  - ${program}
+  - ${args}
+method: grid
+metric:
+  goal: maximize
+  name: success_rate
+parameters:
+  env_name:
+    distribution: constant
+    value: "BlueprintConstruction"
+  scenario_name:
+    distribution: constant
+    value: "quadrant"
+  algorithm_name:
+    distribution: constant
+    value: "rmappo"
+  experiment_name:
+    distribution: constant
+    value: "ablation"
+  num_agents:
+    distribution: constant
+    value: 2
+  num_boxes:
+    distribution: constant
+    value: 4
+  floor_size:
+    distribution: constant
+    value: 6.0
+  task_type:
+    distribution: constant
+    value: "all"
+  seed:
+    distribution: categorical
+    values: [1,2,3,4,5]
+  n_rollout_threads:
+    distribution: constant
+    value: 250
+  data_chunk_length:
+    distribution: constant
+    value: 10
+  num_env_steps:
+    distribution: constant
+    value: 50000000
+  episode_length:
+    distribution: constant
+    value: 240
+  num_mini_batch:
+    distribution: constant
+    value: 1 
+  gain:
+    distribution: constant
+    value: 0.01
+  lr:
+    distribution: constant
+    value: 0.0007
+  ppo_epoch:
+    distribution: categorical
+    values: [5, 10, 15, 20] 
+  
+

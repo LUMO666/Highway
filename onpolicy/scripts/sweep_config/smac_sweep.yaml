@@ -1,0 +1,56 @@
+program: train/train_smac.py
+project: sweep_SMAC
+name: 25_rmappo
+command:
+  - ${env}
+  - python3
+  - ${program}
+  - --eval 
+  - --use_value_active_masks
+  - ${args}
+method: grid
+metric:
+  goal: maximize
+  name: eval_win_rate
+parameters:
+  env_name:
+    distribution: constant
+    value: "StarCraft2"
+  map_name:
+    distribution: constant
+    value: "25m"
+  algorithm_name:
+    distribution: constant
+    value: "rmappo"
+  experiment_name:
+    distribution: constant
+    value: "ablation"
+  seed:
+    distribution: categorical
+    values: [1,2,3,4,5]
+  n_rollout_threads:
+    distribution: constant
+    value: 8
+  data_chunk_length:
+    distribution: constant
+    value: 10
+  num_env_steps:
+    distribution: constant
+    value: 10000000
+  episode_length:
+    distribution: constant
+    value: 400
+  num_mini_batch:
+    distribution: constant
+    value: 1 
+  gain:
+    distribution: constant
+    value: 0.01
+  lr:
+    distribution: constant
+    value: 0.0005
+  ppo_epoch:
+    distribution: categorical
+    values: [5, 10, 15, 20] 
+  
+

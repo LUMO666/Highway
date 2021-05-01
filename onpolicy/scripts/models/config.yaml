@@ -1,0 +1,299 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    cli_version: 0.10.11
+    code_path: code/onpolicy/scripts/train/train_highway.py
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    python_version: 3.6.2
+algorithm_name:
+  desc: null
+  value: rmappo
+attn_N:
+  desc: null
+  value: 1
+attn_heads:
+  desc: null
+  value: 4
+attn_size:
+  desc: null
+  value: 64
+aux_epoch:
+  desc: null
+  value: 5
+available_npc_bubble:
+  desc: null
+  value: 3
+clip_param:
+  desc: null
+  value: 0.2
+clone_coef:
+  desc: null
+  value: 1.0
+collision_reward:
+  desc: null
+  value: -1.0
+critic_lr:
+  desc: null
+  value: 0.0005
+cuda:
+  desc: null
+  value: true
+cuda_deterministic:
+  desc: null
+  value: true
+data_chunk_length:
+  desc: null
+  value: 10
+dropout:
+  desc: null
+  value: 0.0
+dt:
+  desc: null
+  value: 1.0
+dummy_agent_policy_path:
+  desc: null
+  value: ../envs/highway/agents/policy_pool/dqn/model/dueling_ddqn_obs25_act5_baseline.tar
+dummy_agent_type:
+  desc: null
+  value: vi
+entropy_coef:
+  desc: null
+  value: 0.01
+env_name:
+  desc: null
+  value: Highway
+episode_length:
+  desc: null
+  value: 40
+eval_episodes:
+  desc: null
+  value: 32
+eval_interval:
+  desc: null
+  value: 25
+experiment_name:
+  desc: null
+  value: attacker4_tjy19_new_bubble
+gae_lambda:
+  desc: null
+  value: 0.95
+gain:
+  desc: null
+  value: 0.01
+gamma:
+  desc: null
+  value: 0.99
+hidden_size:
+  desc: null
+  value: 64
+horizon:
+  desc: null
+  value: 40
+huber_delta:
+  desc: null
+  value: 10.0
+ifi:
+  desc: null
+  value: 0.1
+layer_N:
+  desc: null
+  value: 1
+log_interval:
+  desc: null
+  value: 1
+lr:
+  desc: null
+  value: 0.0005
+max_grad_norm:
+  desc: null
+  value: 10.0
+model_dir:
+  desc: null
+  value: null
+n_attackers:
+  desc: null
+  value: 4
+n_defenders:
+  desc: null
+  value: 1
+n_dummies:
+  desc: null
+  value: 0
+n_eval_rollout_threads:
+  desc: null
+  value: 1
+n_render_rollout_threads:
+  desc: null
+  value: 1
+n_rollout_threads:
+  desc: null
+  value: 100
+n_training_threads:
+  desc: null
+  value: 1
+npc_vehicles_type:
+  desc: null
+  value: onpolicy.envs.highway.highway_env.vehicle.controller_replay.MDPVehicle_IDMVehicle
+num_env_steps:
+  desc: null
+  value: 10000000.0
+num_mini_batch:
+  desc: null
+  value: 1
+opti_eps:
+  desc: null
+  value: 1.0e-05
+other_agent_policy_path:
+  desc: null
+  value: ../envs/highway/agents/policy_pool/dqn/model/dueling_ddqn_obs25_act5_baseline.tar
+other_agent_type:
+  desc: null
+  value: d3qn
+policy_value_loss_coef:
+  desc: null
+  value: 1
+ppo_epoch:
+  desc: null
+  value: 15
+recurrent_N:
+  desc: null
+  value: 1
+render_episodes:
+  desc: null
+  value: 5
+reward_highest_speed:
+  desc: null
+  value: 35
+save_gifs:
+  desc: null
+  value: false
+save_interval:
+  desc: null
+  value: 1
+scenario_name:
+  desc: null
+  value: highway-v0
+seed:
+  desc: null
+  value: 1
+share_policy:
+  desc: null
+  value: true
+simulation_frequency:
+  desc: null
+  value: 5
+stacked_frames:
+  desc: null
+  value: 1
+task_type:
+  desc: null
+  value: attack
+use_ReLU:
+  desc: null
+  value: true
+use_attn:
+  desc: null
+  value: false
+use_average_pool:
+  desc: null
+  value: true
+use_cat_self:
+  desc: null
+  value: true
+use_centralized_V:
+  desc: null
+  value: true
+use_clipped_value_loss:
+  desc: null
+  value: true
+use_conv1d:
+  desc: null
+  value: false
+use_eval:
+  desc: null
+  value: false
+use_feature_normalization:
+  desc: null
+  value: true
+use_feature_popart:
+  desc: null
+  value: false
+use_gae:
+  desc: null
+  value: true
+use_huber_loss:
+  desc: null
+  value: true
+use_linear_lr_decay:
+  desc: null
+  value: false
+use_max_grad_norm:
+  desc: null
+  value: true
+use_naive_recurrent_policy:
+  desc: null
+  value: false
+use_obs_instead_of_state:
+  desc: null
+  value: false
+use_offscreen_render:
+  desc: null
+  value: true
+use_orthogonal:
+  desc: null
+  value: true
+use_policy_active_masks:
+  desc: null
+  value: true
+use_policy_vhead:
+  desc: null
+  value: false
+use_popart:
+  desc: null
+  value: true
+use_proper_time_limits:
+  desc: null
+  value: false
+use_recurrent_policy:
+  desc: null
+  value: true
+use_render:
+  desc: null
+  value: false
+use_render_vulnerability:
+  desc: null
+  value: true
+use_same_dummy_policy:
+  desc: null
+  value: false
+use_same_other_policy:
+  desc: null
+  value: true
+use_single_network:
+  desc: null
+  value: false
+use_stacked_frames:
+  desc: null
+  value: false
+use_value_active_masks:
+  desc: null
+  value: true
+use_wandb:
+  desc: null
+  value: true
+user_name:
+  desc: null
+  value: zoeyuchao
+value_loss_coef:
+  desc: null
+  value: 1
+vehicles_count:
+  desc: null
+  value: 50
+weight_decay:
+  desc: null
+  value: 0
