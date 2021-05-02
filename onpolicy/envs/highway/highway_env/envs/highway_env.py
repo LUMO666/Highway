@@ -122,7 +122,7 @@ class HighwayEnv(AbstractEnv):
         #### only one defender
         defender_pos=self.controlled_vehicles[0].position
         dis=[]
-
+        # caculate distance to defender
         for i , v in enumerate(self.road.vehicles):
             if i < self.config["n_defenders"]:
                 continue
@@ -131,7 +131,7 @@ class HighwayEnv(AbstractEnv):
                     dis.append(10000)
                 else:
                     dis.append(np.linalg.norm(v.position - defender_pos))
-
+        # sort and take vehicles most close to defender as npc in bubble
         from copy import deepcopy
         dis_sort=deepcopy(dis)
         dis_sort.sort()
@@ -144,6 +144,7 @@ class HighwayEnv(AbstractEnv):
         attacker_dis=random.sample(dis_in_bubble,self.config["n_attackers"])
         npc_dis=[x for x in dis_in_bubble if x not in attacker_dis]
 
+        # ins for attackers, ins_npc for npc in bubble
         for i in range(self.config["n_attackers"]):
             ins.append(dis.index(attacker_dis[i]))
 
@@ -178,6 +179,9 @@ class HighwayEnv(AbstractEnv):
 
             self.road.vehicles[self.config["n_defenders"] + index], self.road.vehicles[self.config["n_defenders"]+self.config["n_attackers"] + i] = \
             self.road.vehicles[self.config["n_defenders"]+self.config["n_attackers"] + i], self.road.vehicles[self.config["n_defenders"] + index]
+        # should add reset distance
+        if reset:
+            pass
 
         self.define_spaces()
 
@@ -210,7 +214,7 @@ class HighwayEnv(AbstractEnv):
             if self.config['task_type']=='attack':
                 if i>=self.config['n_defenders'] and i <(self.config['n_defenders']+self.config['n_attackers']):
                     reward*=0
-                    reward = -1.5 if not vehicle.on_road or vehicle.crashed else 0
+                    reward = -0.5 if not vehicle.on_road or vehicle.crashed else 0
 
             rewards.append(reward)
 

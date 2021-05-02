@@ -7,8 +7,8 @@ n_attackers=4
 n_dummies=0
 
 algo="rmappo"
-exp="lwl_def_IDML_DCm0.5"
-seed_max=2
+exp="lwl_def_IDML_DCp0.5"
+seed_max=1
 username="qiujt"
 ulimit -n 22222
 
