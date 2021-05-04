@@ -26,6 +26,10 @@ class HighwayEnv(AbstractEnv):
     LANE_CHANGE_REWARD: float = 0
     """The reward received at each lane change action."""
 
+    # class learning rank
+    self.class_rank = 0
+    self.class_level = 0
+
     def default_config(self) -> dict:
         config = super().default_config()
         config.update({
@@ -179,9 +183,39 @@ class HighwayEnv(AbstractEnv):
 
             self.road.vehicles[self.config["n_defenders"] + index], self.road.vehicles[self.config["n_defenders"]+self.config["n_attackers"] + i] = \
             self.road.vehicles[self.config["n_defenders"]+self.config["n_attackers"] + i], self.road.vehicles[self.config["n_defenders"] + index]
-        # should add reset distance
-        if reset:
-            pass
+        # should add reset distance for classlearning
+        # Rank 0: defender set on side lane and attacker set behind defender on same lane for a fixed distance, level 0-3 5 11 20 30
+        # Rank 1: defender set on side lane and attacker set on near lane of defender for a fixed distance level 0-3 5 11 20 30
+        # Rank 2: defender set on random lane and attcker set behind defender on random lane but not on same lane for a fixed distance, level 0-3 5 11 20 30
+        # Rank 3: no special reset
+        if reset: #position = [longitude pos, lane_index]
+            distance_list = [5,11,20,30]
+            if self.class_rank == 0:
+                set_attacker_id = np.random.randint(self.config["n_attackers"])
+                self.controlled_vehicles[0].position[1] = random.choice([0,3])
+                self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position = self.controlled_vehicles[0].position
+                self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position[0] -= distance_list[self.class_level]
+            elif self.class_rank == 1:
+                set_attacker_id = np.random.randint(self.config["n_attackers"])
+                self.controlled_vehicles[0].position[1] = random.choice([0,3])
+                self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position = self.controlled_vehicles[0].position
+                self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position[0] -= distance_list[self.class_level]
+                if self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position[1] == 0:
+                    self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position[1] = 1
+                elif self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position[1] == 3:
+                    self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position[1] = 2
+                else:
+                    raise NotImplementedError
+            elif self.class_rank == 2:
+                set_attacker_id = np.random.randint(self.config["n_attackers"])
+                self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position = self.controlled_vehicles[0].position
+                self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position[0] -= distance_list[self.class_level]
+                while self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position[1] == self.controlled_vehicles[0].position[1]:
+                    self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position[1] = np.random.randint(4)
+            elif self.calss_rank == 3:
+                pass
+            else:
+                raise NotImplementedError
 
         self.define_spaces()
 
