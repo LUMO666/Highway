@@ -27,8 +27,7 @@ class HighwayEnv(AbstractEnv):
     """The reward received at each lane change action."""
 
     # class learning rank
-    self.class_rank = 0
-    self.class_level = 0
+
 
     def default_config(self) -> dict:
         config = super().default_config()
@@ -50,6 +49,8 @@ class HighwayEnv(AbstractEnv):
             "reward_speed_range": [20, 30],
             "offroad_terminal": False
         })
+        self.class_rank = 0
+        self.class_level = 0
         return config
 
     def _reset(self) -> None:
@@ -115,7 +116,7 @@ class HighwayEnv(AbstractEnv):
         else:
             return False
 
-    def acquire_attacker(self,reset=False):
+    def acquire_attacker(self,reset=False,diff=0):
         if reset:
             for i,v in enumerate(self.controlled_vehicles):
                 if i < self.config["n_defenders"]:

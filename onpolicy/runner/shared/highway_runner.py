@@ -5,6 +5,7 @@ import numpy as np
 from itertools import chain
 import torch
 import imageio
+from icecream import ic
 from onpolicy.utils.util import update_linear_schedule
 from onpolicy.runner.shared.base_runner import Runner
 from pathlib import Path
@@ -108,6 +109,9 @@ class HighwayRunner(Runner):
                 self.log_train(train_infos, total_num_steps)
 
                 self.log_env(self.env_infos, total_num_steps)
+
+            ############ curriclum learning
+
 
             # eval
             if episode % self.eval_interval == 0 and self.use_eval:
@@ -230,6 +234,9 @@ class HighwayRunner(Runner):
         eval_masks = np.ones((self.n_eval_rollout_threads, self.num_agents, 1), dtype=np.float32)
         eval_dones_env = np.zeros(self.n_eval_rollout_threads, dtype=bool)
 
+        ###### curriclum learning diffculty change standard
+        eval_adv_rew = []
+
         while True:
             eval_choose = eval_dones_env==False
             if ~np.any(eval_choose):
@@ -247,7 +254,7 @@ class HighwayRunner(Runner):
                
             # Observe reward and next obs
             eval_obs, eval_rewards, eval_dones, eval_infos = eval_envs.step(eval_actions)
-
+                 
             eval_dones_env = np.all(eval_dones, axis=-1)
 
             eval_episode_rewards += eval_rewards

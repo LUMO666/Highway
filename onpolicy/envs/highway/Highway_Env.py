@@ -51,6 +51,9 @@ class HighwayEnv(gym.core.Wrapper):
         self.n_attackers = all_args.n_attackers
         self.n_dummies = self.available_npc_bubble#all_args.n_dummies
 
+        #curriclum learning difficulty parameter
+        self.diff = 0
+
         if self.task_type == "attack":
             self.n_agents = self.n_attackers
             self.n_other_agents = self.n_defenders
@@ -477,7 +480,8 @@ class HighwayEnv(gym.core.Wrapper):
             self.cache_frames = []
             self.pick_frames = []
 
-            all_obs, infos, available_actions = self.env.reset()
+
+            all_obs, infos, available_actions = self.env.reset(diff = self.diff)
 
             # ? dummy needs to take all obs ?
             self.dummy_obs = np.array([np.concatenate(all_obs[self.n_attackers + self.n_defenders + agent_id]) \
