@@ -49,11 +49,9 @@ class HighwayEnv(AbstractEnv):
             "reward_speed_range": [20, 30],
             "offroad_terminal": False
         })
-        self.class_rank = 0
-        self.class_level = 0
         return config
 
-    def _reset(self) -> None:
+    def _reset(self, dif) -> None:
 
         ######## Jianming Jan 29 New feature -> bubble test: control handover
         self.use_bubble = True
@@ -61,7 +59,7 @@ class HighwayEnv(AbstractEnv):
         ########
         self._create_road()
         self._create_vehicles()
-        self.acquire_attacker(True)
+        self.acquire_attacker(True, diff=dif)
 
 
     def _create_road(self) -> None:
@@ -189,6 +187,16 @@ class HighwayEnv(AbstractEnv):
         # Rank 1: defender set on side lane and attacker set on near lane of defender for a fixed distance level 0-3 5 11 20 30
         # Rank 2: defender set on random lane and attcker set behind defender on random lane but not on same lane for a fixed distance, level 0-3 5 11 20 30
         # Rank 3: no special reset
+        if reset:
+            if diff > 1:
+                diff = 1
+            distance = 10 + 20*diff
+            set_attacker_id = np.random.randint(self.config["n_attackers"])
+            self.controlled_vehicles[0].position[1] = random.choice([0,3])
+            self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position = self.controlled_vehicles[0].position
+            self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position[0] -= distance
+
+        '''
         if reset: #position = [longitude pos, lane_index]
             distance_list = [5,11,20,30]
             if self.class_rank == 0:
@@ -217,7 +225,7 @@ class HighwayEnv(AbstractEnv):
                 pass
             else:
                 raise NotImplementedError
-
+        '''
         self.define_spaces()
 
     def _reward(self, action: Action) :#-> float: now we return a list

@@ -481,7 +481,7 @@ class HighwayEnv(gym.core.Wrapper):
             self.pick_frames = []
 
 
-            all_obs, infos, available_actions = self.env.reset(diff = self.diff)
+            all_obs, infos, available_actions = self.env.reset(dif = self.diff)
 
             # ? dummy needs to take all obs ?
             self.dummy_obs = np.array([np.concatenate(all_obs[self.n_attackers + self.n_defenders + agent_id]) \

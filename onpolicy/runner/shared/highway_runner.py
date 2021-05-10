@@ -26,7 +26,9 @@ class HighwayRunner(Runner):
 
         self.n_defenders = self.all_args.n_defenders
         self.n_attackers = self.all_args.n_attackers
-        
+        # curriclum learning parameter
+        self.diff = 0
+
 
     def run(self):
         self.warmup()   
@@ -45,6 +47,7 @@ class HighwayRunner(Runner):
                               "cost": [], 
                               "crashed": [],
                               "adv_rewards":[],
+                              "difficulty":[],
                               "episode_length":[],
                               "bubble_rewards":[],}
 
@@ -89,6 +92,12 @@ class HighwayRunner(Runner):
             if (episode % self.save_interval == 0 or episode == episodes - 1):
                 self.save()
 
+            ############ curriclum learning
+            if np.mean(self.env_infos["adv_rewards"]) >= 1.75:
+                self.diff += 0.01
+                self.env.diff = self.diff
+                self.env_infos["difficulty"] = self.diff
+
             # log information
             if episode % self.log_interval == 0:
                 end = time.time()
@@ -109,9 +118,6 @@ class HighwayRunner(Runner):
                 self.log_train(train_infos, total_num_steps)
 
                 self.log_env(self.env_infos, total_num_steps)
-
-            ############ curriclum learning
-
 
             # eval
             if episode % self.eval_interval == 0 and self.use_eval:
