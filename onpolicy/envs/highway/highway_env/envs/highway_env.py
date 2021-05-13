@@ -252,7 +252,15 @@ class HighwayEnv(AbstractEnv):
         if np.all(defender_done) and (not np.any(attacker_done)):
             ad_rew=2
         elif np.all(defender_done):
-            ad_rew = 1
+            intension_flag = 0
+            attacker_collision_id = np.where(attacker_done==1)
+            for att in attacker_collision_id:
+                if self.controlled_vehicles[self.config["n_defenders"]+att].action["steering"]<0.1 and self.controlled_vehicles[self.config["n_defenders"]+att].action["acceleration"]<1:
+                    intension_flag = 1
+            if intension_flag == 1:
+                ad_rew = 2
+            else:
+                ad_rew = -1
         #elif np.any(defender_done):
         #    ad_rew = 0.2
         else:
