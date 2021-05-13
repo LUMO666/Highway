@@ -260,7 +260,7 @@ class HighwayEnv(AbstractEnv):
             if intension_flag == 1:
                 ad_rew = 2
             else:
-                ad_rew = -1
+                ad_rew = 1
         #elif np.any(defender_done):
         #    ad_rew = 0.2
         else:
