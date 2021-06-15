@@ -156,7 +156,7 @@ class AbstractEnv(gym.Env):
         """
         raise NotImplementedError
 
-    def reset(self):
+    def reset(self,dif=0):
         """
         Reset the environment to it's initial configuration
 
@@ -166,7 +166,7 @@ class AbstractEnv(gym.Env):
 
         self.time = self.steps = 0
         #self.done = False
-        self._reset()
+        self._reset(dif)
         self.define_spaces()  # Second, to link the obs and actions to the vehicles once the scene is created
         self.rendered_image = []
         info = {

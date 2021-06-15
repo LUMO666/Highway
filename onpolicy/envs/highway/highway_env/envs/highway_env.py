@@ -1,6 +1,7 @@
 import numpy as np
 from typing import Tuple
 from gym.envs.registration import register
+import copy
 
 from onpolicy.envs.highway.highway_env import utils
 from onpolicy.envs.highway.highway_env.envs.common.abstract import AbstractEnv
@@ -193,8 +194,11 @@ class HighwayEnv(AbstractEnv):
             distance = 10 + 20*diff
             set_attacker_id = np.random.randint(self.config["n_attackers"])
             self.controlled_vehicles[0].position[1] = random.choice([0,3])
-            self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position = self.controlled_vehicles[0].position
+            self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position = copy.deepcopy(self.controlled_vehicles[0].position)
             self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position[0] -= distance
+            #print("att:",self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position)
+            #print("def:",self.controlled_vehicles[0].position)
+            #print("dif:",diff)
 
         '''
         if reset: #position = [longitude pos, lane_index]

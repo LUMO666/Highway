@@ -96,7 +96,7 @@ class HighwayRunner(Runner):
             if np.mean(self.env_infos["adv_rewards"]) >= 1.75:
                 self.diff += 0.01
                 self.env.diff = self.diff
-                self.env_infos["difficulty"] = self.diff
+            self.env_infos["difficulty"] = [self.diff]
 
             # log information
             if episode % self.log_interval == 0:

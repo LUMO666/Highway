@@ -43,8 +43,8 @@ class IDMAgent():
         self.timer = timer or (np.sum(self.vehicle.position) * np.pi) % self.LANE_CHANGE_DELAY
 
     SPEED_COUNT: int = 3  # []
-    SPEED_MIN: float = 25  # [m/s]
-    SPEED_MAX: float = 30  # [m/s]
+    SPEED_MIN: float = 20  # [m/s]
+    SPEED_MAX: float = 24  # [m/s]
 
     ########### Parameter of IDMVehicle
     # Longitudinal policy parameters
@@ -77,7 +77,7 @@ class IDMAgent():
         # Longitudinal: IDM
         self.vehicle = env.road.vehicles[self.vehicle_id]
         ######### TODO: Where the hell did this target come from and keep changing???
-        self.vehicle.target_speed = 30
+        self.vehicle.target_speed = 20
         #print("veh:",env.road.vehicles[self.vehicle_id])
         #print("self.veh:",self.vehicle)
         action = {}
