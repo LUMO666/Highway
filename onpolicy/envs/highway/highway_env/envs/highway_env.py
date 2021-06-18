@@ -299,7 +299,7 @@ class HighwayEnv(AbstractEnv):
         if np.all(defender_done) and (not np.any(attacker_done)):
             ad_rew=2
         elif np.all(defender_done):
-            ad_rew = 1
+            ad_rew = 0.6
         #elif np.any(defender_done):
         #    ad_rew = 0.2
         else:

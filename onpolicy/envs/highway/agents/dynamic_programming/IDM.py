@@ -77,7 +77,7 @@ class IDMAgent():
         # Longitudinal: IDM
         self.vehicle = env.road.vehicles[self.vehicle_id]
         ######### TODO: Where the hell did this target come from and keep changing???
-        self.vehicle.target_speed = 20
+        self.vehicle.target_speed = 24
         #print("veh:",env.road.vehicles[self.vehicle_id])
         #print("self.veh:",self.vehicle)
         action = {}

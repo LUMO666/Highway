@@ -7,7 +7,7 @@ n_attackers=4
 n_dummies=0
 
 algo="rmappo"
-exp="lwl_IDML_cl_lowspeed"
+exp="lwl_IDML_cl_lowspeed_24_easymode"
 seed_max=1
 username="liuwl"
 ulimit -n 22222
