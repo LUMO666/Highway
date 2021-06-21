@@ -95,8 +95,7 @@ class IDMAgent():
             IDMaction = 3
         elif action['acceleration']<-2:
             IDMaction = 4
-        else:
-            
+        else:            
             IDMaction = 1
         # Lateral: MOBIL
         self.follow_road()
@@ -110,11 +109,13 @@ class IDMAgent():
 
         # Force a bad change lane rule
         #front_vehicle, rear_vehicle = self.vehicle.road.neighbour_vehicles(self.vehicle)
-        if rear_vehicle:    
+        if rear_vehicle:
+            #print("rear_dis:",rear_vehicle.front_distance_to(self.vehicle), "change_dis:",self.DISTANCE_CHANGE)    
             if rear_vehicle.front_distance_to(self.vehicle) < self.DISTANCE_CHANGE:
             #if self.vehicle.front_distance_to(front_vehicle) < self.DISTANCE_CHANGE:
                 #print("############# FORCE LANE CHANGE ############")
                 #force side lane crash
+                #print("flaw trigger")
                 if self.vehicle.lane_index[2] == 0:
                     IDMaction = 0
                     self.vehicle.crashed = True
@@ -122,14 +123,24 @@ class IDMAgent():
                     IDMaction = 2
                     self.vehicle.crashed = True
                 else:
+                    '''
                     for lane_index in self.vehicle.road.network.side_lanes(self.vehicle.lane_index):
                         if self.vehicle.road.network.get_lane(lane_index).is_reachable_from(self.vehicle.position):
                             self.target_lane_index = lane_index
                     if self.vehicle.target_lane_index[2]<self.vehicle.lane_index[2]:
                         IDMaction = 0
+                        print("uplane change")
                     elif self.vehicle.target_lane_index[2]>self.vehicle.lane_index[2]:
                         IDMaction = 2
-
+                        print("botlane change")
+                    '''
+                    flaw_list = [0,2]
+                    IDMaction = flaw_list[np.random.randint(0,2)]
+                    #print("flaw change")
+                '''
+                #easymode
+                self.vehicle.crashed = True
+                '''
         #print("act:",IDMaction)
 
         return IDMaction

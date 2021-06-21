@@ -272,6 +272,7 @@ class HighwayEnv(gym.core.Wrapper):
                     other_actions = []
                     for other_id in range(self.n_other_agents):
                         other_actions.append([self.other_agents[other_id].act(self.env)])
+                        print("IDM act ", other_actions[0])
                     if self.train_start_idx == 0:
                         action = np.concatenate([action, other_actions])
                     else:

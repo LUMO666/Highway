@@ -55,7 +55,7 @@ class HighwayEnv(AbstractEnv):
     def _reset(self, dif) -> None:
 
         ######## Jianming Jan 29 New feature -> bubble test: control handover
-        self.use_bubble = True
+        self.use_bubble = False
         self.max_bubble_length = self.config["bubble_length"]   ####max_length_bubble
         ########
         self._create_road()
@@ -145,7 +145,8 @@ class HighwayEnv(AbstractEnv):
         self.npcs_in_bubble=[]
 
         dis_in_bubble=deepcopy(dis_sort[:self.config["n_attackers"] + npc_bubble])
-        attacker_dis=random.sample(dis_in_bubble,self.config["n_attackers"])
+        #attacker_dis=random.sample(dis_in_bubble,self.config["n_attackers"])
+        attacker_dis = dis_in_bubble[:self.config["n_attackers"]]
         npc_dis=[x for x in dis_in_bubble if x not in attacker_dis]
 
         # ins for attackers, ins_npc for npc in bubble
@@ -191,11 +192,17 @@ class HighwayEnv(AbstractEnv):
         if reset:
             if diff > 1:
                 diff = 1
-            distance = 10 + 20*diff
+            #distance = 10 + 20*diff
+            #test lane change
+            distance = 10
             set_attacker_id = np.random.randint(self.config["n_attackers"])
-            self.controlled_vehicles[0].position[1] = random.choice([0,3])
+            self.controlled_vehicles[0].position[1] = random.choice([0,1,2,3])
+            #print("att_id:",set_attacker_id)
+            
             self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position = copy.deepcopy(self.controlled_vehicles[0].position)
             self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position[0] -= distance
+            #print(self.controlled_vehicles[0].position)
+            #print( self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position)
             #print("att:",self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position)
             #print("def:",self.controlled_vehicles[0].position)
             #print("dif:",diff)

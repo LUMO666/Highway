@@ -367,6 +367,8 @@ class HighwayRunner(Runner):
 
             # log info
             print("render average episode rewards is: " + str(np.mean(np.array(render_env_infos["episode_rewards"]))))
+            print("render average adv rewards is: " + str(np.mean(np.array(render_env_infos["adv_rewards"]))))
+            print(np.array(render_env_infos["adv_rewards"]))
             for i, s in enumerate(range(self.n_defenders + self.n_attackers)):
                 if i < self.n_defenders:
                     print("render average episode defender_{}_speed is: ".format(i) + str(

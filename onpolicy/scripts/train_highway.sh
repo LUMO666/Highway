@@ -3,11 +3,11 @@ env="Highway"
 scenario="highway-v0"
 task="attack"
 n_defenders=1
-n_attackers=4
+n_attackers=1
 n_dummies=0
 
 algo="rmappo"
-exp="lwl_IDML_cl_lowspeed_24_easymode"
+exp="lwl_IDML_cl_lowspeed_24_bubble_off_fix_changelane_single"
 seed_max=1
 username="liuwl"
 ulimit -n 22222

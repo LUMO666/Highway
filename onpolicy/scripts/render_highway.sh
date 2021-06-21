@@ -3,17 +3,17 @@ env="Highway"
 scenario="highway-v0"
 task="attack"
 n_defenders=1
-n_attackers=4
+n_attackers=1
 
 n_dummies=0
 algo="rmappo"
-exp="lwl_cl_lowspeed"
+exp="lwl_cl_lowspeed_easymode"
 seed_max=1
 
 echo "env is ${env}"
 for seed in `seq ${seed_max}`
 do
 
-    CUDA_VISIBLE_DEVICES=0 python render/render_highway.py --env_name ${env} --algorithm_name ${algo} --experiment_name ${exp} --scenario_name ${scenario} --task_type ${task} --n_attackers ${n_attackers} --n_defenders ${n_defenders} --n_dummies ${n_dummies} --seed ${seed} --n_training_threads 1 --n_render_rollout_threads 1 --horizon 40 --use_render --use_wandb --other_agent_type "IDM" --model_dir "/home/tsing89/Highway/onpolicy/scripts/results/Highway/highway-v0/rmappo/lwl_IDML_cl_lowspeed_24/wandb/latest-run/files"  --render_episodes 10 --npc_vehicles_type "onpolicy.envs.highway.highway_env.vehicle.controller_replay.MDPVehicle_IDMVehicle" --dummy_agent_type "vi" --save_gifs
+    CUDA_VISIBLE_DEVICES=0 python render/render_highway.py --env_name ${env} --algorithm_name ${algo} --experiment_name ${exp} --scenario_name ${scenario} --task_type ${task} --n_attackers ${n_attackers} --n_defenders ${n_defenders} --n_dummies ${n_dummies} --seed ${seed} --n_training_threads 1 --n_render_rollout_threads 1 --horizon 40 --use_render --load_train_config --use_wandb --other_agent_type "IDM" --model_dir "/home/tsing89/Highway/onpolicy/scripts/results/Highway/highway-v0/rmappo/lwl_IDML_cl_lowspeed_24_easymode/wandb/run-20210619_072628-lm0vzg52/files"  --render_episodes 10 --npc_vehicles_type "onpolicy.envs.highway.highway_env.vehicle.controller_replay.MDPVehicle_IDMVehicle" --dummy_agent_type "vi" --save_gifs
 
 done
