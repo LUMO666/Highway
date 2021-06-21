@@ -9,7 +9,7 @@ n_dummies=0
 algo="rmappo"
 exp="muye_master"
 seed_max=1
-username="qiujt"
+username="thumy"
 ulimit -n 22222
 
 echo "env is ${env}, scenario is ${scenario}, task is ${task}, algo is ${algo}, exp is ${exp}, max seed is ${seed_max}"
