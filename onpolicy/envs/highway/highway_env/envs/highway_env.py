@@ -192,9 +192,9 @@ class HighwayEnv(AbstractEnv):
         if reset:
             if diff > 1:
                 diff = 1
-            #distance = 10 + 20*diff
+            distance = 10 + 20*diff
             #test lane change
-            distance = 10
+            #distance = 10
             set_attacker_id = np.random.randint(self.config["n_attackers"])
             self.controlled_vehicles[0].position[1] = random.choice([0,1,2,3])
             #print("att_id:",set_attacker_id)
