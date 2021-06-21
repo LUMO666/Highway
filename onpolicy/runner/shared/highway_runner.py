@@ -95,7 +95,7 @@ class HighwayRunner(Runner):
             ############ curriclum learning
             if np.mean(self.env_infos["adv_rewards"]) >= 1.75:
                 self.diff += 0.01
-                self.env.diff = self.diff
+                self.envs.diff = self.diff
             self.env_infos["difficulty"] = [self.diff]
 
             # log information

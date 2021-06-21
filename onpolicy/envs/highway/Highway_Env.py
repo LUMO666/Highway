@@ -469,7 +469,7 @@ class HighwayEnv(gym.core.Wrapper):
 
         return obs, rewards, dones, infos#, available_actions
 
-    def reset(self, choose):
+    def reset(self, choose=True):
         if choose:
             self.episode_speeds = []
             self.episode_rewards = []
