@@ -309,7 +309,7 @@ class HighwayRunner(Runner):
         for episode in range(self.all_args.render_episodes):
             all_frames = []
             render_choose = np.ones(self.n_render_rollout_threads) == 1.0
-            obs = envs.reset(render_choose)
+            obs = envs.reset(choose = render_choose, cl_render=True)
 
             if self.all_args.save_gifs:
 
