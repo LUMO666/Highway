@@ -51,7 +51,7 @@ class HighwayEnv(AbstractEnv):
     def _reset(self) -> None:
 
         ######## Jianming Jan 29 New feature -> bubble test: control handover
-        self.use_bubble = True
+        self.use_bubble = False
         self.max_bubble_length = self.config["bubble_length"]   ####max_length_bubble
         ########
         self._create_road()
@@ -141,7 +141,8 @@ class HighwayEnv(AbstractEnv):
         self.npcs_in_bubble=[]
 
         dis_in_bubble=deepcopy(dis_sort[:self.config["n_attackers"] + npc_bubble])
-        attacker_dis=random.sample(dis_in_bubble,self.config["n_attackers"])
+        #attacker_dis=random.sample(dis_in_bubble,self.config["n_attackers"])
+        attacker_dis = dis_in_bubble[:self.config["n_attackers"]]
         npc_dis=[x for x in dis_in_bubble if x not in attacker_dis]
 
         # ins for attackers, ins_npc for npc in bubble

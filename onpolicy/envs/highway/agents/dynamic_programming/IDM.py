@@ -122,6 +122,7 @@ class IDMAgent():
                     IDMaction = 2
                     self.vehicle.crashed = True
                 else:
+                    '''
                     for lane_index in self.vehicle.road.network.side_lanes(self.vehicle.lane_index):
                         if self.vehicle.road.network.get_lane(lane_index).is_reachable_from(self.vehicle.position):
                             self.target_lane_index = lane_index
@@ -129,6 +130,9 @@ class IDMAgent():
                         IDMaction = 0
                     elif self.vehicle.target_lane_index[2]>self.vehicle.lane_index[2]:
                         IDMaction = 2
+                        '''
+                    flaw_list = [0,2]
+                    IDMaction = flaw_list[np.random.randint(0,2)]
 
         #print("act:",IDMaction)
 
