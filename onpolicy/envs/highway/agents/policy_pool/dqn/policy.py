@@ -64,4 +64,5 @@ class actor(nn.Module):
         return actions.detach().numpy()
 
     def load_state_dict(self, policy_state_dict):
-        self.value_net.load_state_dict(policy_state_dict['state_dict'])
+        #self.value_net.load_state_dict(policy_state_dict['state_dict'])
+        self.value_net.load_state_dict({k.replace('value_net.',''):v for k,v in policy_state_dict.items()})

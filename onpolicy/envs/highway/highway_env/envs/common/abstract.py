@@ -210,6 +210,7 @@ class AbstractEnv(gym.Env):
             "crashed": [vehicle.crashed for vehicle in self.controlled_vehicles],
             "action": action,
             "adv_rew":self.adv_rew(),
+            "dis_rew":self.dis_rew(),
             "position":[vehicle.position for vehicle in self.controlled_vehicles],
             "bubble_stop":self.bubble_terminated(),
             "npc_speed": [vehicle.speed for vehicle in self.npcs_in_bubble],

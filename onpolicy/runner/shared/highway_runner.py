@@ -56,6 +56,7 @@ class HighwayRunner(Runner):
                     self.env_infos.update({"attacker_{}_speed".format(i): []})
                     self.env_infos.update({"attacker_{}_crash".format(i): []})
                     self.env_infos.update({"attacker_{}_distance".format(i): []})
+                    self.env_infos.update({"attacker_{}_dis_reward".format(i): []})
 
             self.adv_rew_for_zero=[]
 

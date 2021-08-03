@@ -77,7 +77,7 @@ class IDMAgent():
         # Longitudinal: IDM
         self.vehicle = env.road.vehicles[self.vehicle_id]
         ######### TODO: Where the hell did this target come from and keep changing???
-        self.vehicle.target_speed = 30
+        self.vehicle.target_speed = 23.5
         #print("veh:",env.road.vehicles[self.vehicle_id])
         #print("self.veh:",self.vehicle)
         action = {}
@@ -131,8 +131,10 @@ class IDMAgent():
                     elif self.vehicle.target_lane_index[2]>self.vehicle.lane_index[2]:
                         IDMaction = 2
                         '''
+                    '''
                     flaw_list = [0,2]
                     IDMaction = flaw_list[np.random.randint(0,2)]
+                    '''
 
         #print("act:",IDMaction)
 

@@ -80,6 +80,10 @@ class HighwayEnv(AbstractEnv):
             default_spacing = 12.5 # 0.5 * speed
             longitude_position = 40+5*np.random.randint(1)
             initial_lane_idx = random.choice( [4*i for i in range(self.config["lanes_count"])] )
+            '''
+            if i==0:
+                initial_lane_idx=random.choice([4,8])
+                '''
             # To separate cars in different places to avoid collision
             for vehicle_ in self.controlled_vehicles:
                 if abs(longitude_position - vehicle_.position[0]) < 5 and initial_lane_idx == 4*vehicle_.lane_index[2]:
@@ -251,15 +255,46 @@ class HighwayEnv(AbstractEnv):
 
         ###check!
         if np.all(defender_done) and (not np.any(attacker_done)):
-            ad_rew=2
+            ad_rew=10
         elif np.all(defender_done):
-            ad_rew = 1
+            ad_rew = 0
         #elif np.any(defender_done):
         #    ad_rew = 0.2
         else:
             ad_rew = 0
 
         return ad_rew
+    
+    '''def defender_crash_intention(self):#-> bool
+        if np.abs(self.controlled_vehicles[0].heading)> 3.14/36 and:
+            return True
+        else:
+            return False'''
+
+
+    
+    def sigmoid(self,x):
+    # 直接返回sigmoid函数
+        return 1. / (1. + np.exp(-x))
+    
+    def dis2rew(self,dis) :
+        longitudinal=np.abs(dis[0])
+        lateral=np.abs(dis[1])
+        lp=4
+        x=np.power(np.power(longitudinal,lp)+np.power(2.5*lateral,lp),1/lp)-10
+        reward=(self.sigmoid(x)*(1-self.sigmoid(x))*4.-0.5)
+        return reward
+
+    def dis_rew(self) :#-> bool:
+        distance_rewards=[]
+        for i,vehicle in enumerate(self.controlled_vehicles):
+            if i < self.config["n_defenders"]:
+                continue
+            else:
+                Distance = self.controlled_vehicles[0].position - vehicle.position
+                distance_rew=self.dis2rew(Distance)
+            distance_rewards.append(distance_rew)
+        return distance_rewards
 
     def _is_done(self) :#-> bool:
         """The episode is over if the ego vehicle crashed or the time is out."""

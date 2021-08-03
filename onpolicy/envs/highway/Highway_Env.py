@@ -430,16 +430,50 @@ class HighwayEnv(gym.core.Wrapper):
 
             if self.task_type == "attack":
                 adv_rew = infos["adv_rew"]
+                dis_rew = infos["dis_rew"]
+                crashes = [infos["crashed"][agent_id] for agent_id in range(self.n_defenders + self.n_attackers)]
+                for i, rew in enumerate(dis_rew):
+                    if i<self.n_attackers:
+                        infos.update({"attacker_{}_dis_reward".format(i+self.n_defenders): rew}) 
+                        if not crashes[i+self.n_defenders]:
+                            rewards[i][0]+=rew
             else:
                 adv_rew = 0
+            self.attack_succeed=False
+            if self.controlled_vehicles[0].crashed and np.abs(self.controlled_vehicles[0].heading)>3.14/36:
+                self.attack_succeed=True
+                for i,v in enumerate(self.controlled_vehicles):
+                    if i<self.n_defenders or i>=self.n_defenders+self.n_attackers:
+                        continue
+                    elif v.crashed and v._is_colliding(self.controlled_vehicles[0]):
+                        print(v.action['acceleration'])
+                        if len(self.controlled_vehicles_trajectory)>2 :
+                            #self.attack_succeed=(self.attack_succeed and np.abs(v.heading)<3.14/36 and np.abs(v.action['acceleration'])<0.5 and np.abs(self.controlled_vehicles_trajectory[-1][i].action['acceleration'])<0.5 and np.abs(self.controlled_vehicles_trajectory[-2][i].action['acceleration'])<0.5 and np.abs(self.controlled_vehicles_trajectory[-1][i].heading)<3.14/36)
+                            self.attack_succeed=(self.attack_succeed and (v.lane_index[2]\
+                            ==self.controlled_vehicles_trajectory[-1][i].lane_index[2])\
+                            and (v.lane_index[2]!=self.controlled_vehicles_trajectory[-1][0].lane_index[2])\
+                            and np.abs(v.heading)<3.14/36\
+                            and np.abs(v.action['acceleration'])<1\
+                            and np.abs(self.controlled_vehicles_trajectory[-1][i].action['acceleration'])<1)
+                        else:
+                            self.attack_succeed= False
+                if self.attack_succeed:
+                    adv_rew=10
+            else:
+                self.c_v=deepcopy(self.controlled_vehicles)
+                self.controlled_vehicles_trajectory.append(self.c_v)
+            
+            #print(self.controlled_vehicles[1].action['acceleration'])
+            #print(self.controlled_vehicles[2].action['acceleration'])
 
             ####adv_rew
             if adv_rew>0:
                 for a_id,done in enumerate(dones):
                     if not self.last_dones[a_id]:
                         rewards[a_id][0]+=adv_rew
-
+   
             self.bubble_adv_rewards.append(adv_rew)
+            self.bubble_dis_rewards.append(dis_rew)
             self.episode_rewards.append(rewards)
 
             infos.update({"episode_rewards": np.sum(self.episode_rewards, axis=0),
@@ -454,6 +488,7 @@ class HighwayEnv(gym.core.Wrapper):
             if infos["bubble_stop"]:
                 self.bubble_rewards = []
                 self.bubble_adv_rewards = []
+                self.bubble_dis_rewards = []
 
             self.last_dones=dones
             
@@ -471,11 +506,13 @@ class HighwayEnv(gym.core.Wrapper):
             self.episode_rewards = []
             self.bubble_rewards=[]
             self.bubble_adv_rewards=[]
+            self.bubble_dis_rewards=[]
             self.episode_dummy_rewards = []
             self.episode_other_rewards = []
             self.current_step = 0
             self.cache_frames = []
             self.pick_frames = []
+            self.controlled_vehicles_trajectory=[]
 
             all_obs, infos, available_actions = self.env.reset()
 
