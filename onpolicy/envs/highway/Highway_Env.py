@@ -216,6 +216,15 @@ class HighwayEnv(gym.core.Wrapper):
                 dummy = DummyAgent(env=self.env_init,
                                    vehicle_id=agent_id)
                 self.other_agents.append(dummy)
+        elif self.other_agent_type == "mcts":
+            from .agents.tree_search.mcts import MCTSAgent as DummyAgent 
+            agent_config = {"max_depth": 1, "budget": 200, "temperature": 200}
+            self.other_agents = []
+            for agent_id in range(self.n_other_agents):
+                dummy = DummyAgent(env=self.env_init,
+                                   config=agent_config,
+                                   vehicle_id=agent_id)
+                self.other_agents.append(dummy)  
         else:
             if self.other_agent_type == "d3qn":
                 from .agents.policy_pool.dqn.policy import actor as Policy
@@ -273,6 +282,15 @@ class HighwayEnv(gym.core.Wrapper):
                         action = np.concatenate([action, other_actions])
                     else:
                         action = np.concatenate([other_actions, action])
+                elif self.other_agent_type == "mcts":
+                    other_actions = []
+                    for other_id in range(self.n_other_agents):
+                        other_actions.append([self.other_agents[other_id].act(self.other_obs[other_id])])
+                    if self.train_start_idx == 0:
+                        action = np.concatenate([action, other_actions])
+                    else:
+                        action = np.concatenate([other_actions, action])
+
                 else:
                     if self.use_same_other_policy:
                         other_actions, self.rnn_states \

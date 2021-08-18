@@ -73,7 +73,7 @@ def parse_args(args, parser):
     parser.add_argument("--npc_vehicles_type", type=str, default="onpolicy.envs.highway.highway_env.vehicle.behavior.IDMVehicle", help="by default, choose IDM Vehicle model (a rule-based model with ability to change lane & speed). And also could be set as 'onpolicy.envs.highway.highway_env.vehicle.dummy.DummyVehicle' or 'onpolicy.envs.highway.highway_env.vehicle.werling.werling.WerlingVehicle' to launch a werling vehicle or 'onpolicy.envs.highway.highway_env.vehicle.controller_replay.MDPVehicle_IDMVehicle' to launch the vehicle with switchable control method")
     
     parser.add_argument("--other_agent_type", type=str, 
-                        default="ppo", choices = ["d3qn","ppo","vi","IDM"],
+                        default="ppo", choices = ["d3qn","ppo","vi","IDM","mcts"],
                         help='Available type is "d3qn[duel_ddqn agent]" or "ppo[onpolicy agent]". Update "IDM[IDM_loose]" version for test.')
     parser.add_argument('--other_agent_policy_path', type=str,
                         default='../envs/highway/agents/policy_pool/ppo/model/actor.pt', 
