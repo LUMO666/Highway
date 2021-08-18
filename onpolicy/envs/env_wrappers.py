@@ -164,6 +164,8 @@ def worker(remote, parent_remote, env_fn_wrapper):
         elif cmd == 'reset_task':
             ob = env.reset_task()
             remote.send(ob)
+        elif cmd == 'set_diff':
+            ob = env.set_diff(data)
         elif cmd == 'close':
             env.close()
             remote.close()
@@ -271,6 +273,9 @@ class SubprocVecEnv(ShareVecEnv):
         obs = [remote.recv() for remote in self.remotes]
         return np.stack(obs)
 
+    def set_diff(self,diff):
+        for remote in self.remotes:
+            remote.send(('set_diff', diff))
 
     def reset_task(self):
         for remote in self.remotes:

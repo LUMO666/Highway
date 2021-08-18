@@ -149,6 +149,8 @@ class HighwayEnv(gym.core.Wrapper):
         self.action_space = self.new_action_space
         self.cache_frames = []
 
+    def set_diff(self,dif):
+        self.diff = dif
 
     def load_dummies(self):
         if self.dummy_agent_type in ["vi", "rvi"]:
@@ -237,6 +239,7 @@ class HighwayEnv(gym.core.Wrapper):
                                     use_recurrent_policy = self.all_args.use_recurrent_policy) # cpu is fine actually, keep it for now.
                 print(f"path = {self.other_agent_policy_path}")
                 policy_state_dict = torch.load(self.other_agent_policy_path, map_location='cpu')
+                #print(policy_state_dict)
                 self.other_agents.load_state_dict(policy_state_dict)
                 self.other_agents.eval()
             else:
@@ -481,8 +484,8 @@ class HighwayEnv(gym.core.Wrapper):
             self.cache_frames = []
             self.pick_frames = []
 
-
             all_obs, infos, available_actions = self.env.reset(dif = self.diff)
+            print("Highway_Env:",self.diff)
 
 
             # ? dummy needs to take all obs ?

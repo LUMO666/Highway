@@ -60,7 +60,9 @@ class HighwayEnv(AbstractEnv):
         ########
         self._create_road()
         self._create_vehicles()
-        self.acquire_attacker(True, diff=dif)
+        self.acquire_attacker(True, diff=dif, acq_cl = False)
+        self.dif = dif
+        print("dif@reset:",self.dif)
 
 
     def _create_road(self) -> None:
@@ -115,7 +117,7 @@ class HighwayEnv(AbstractEnv):
         else:
             return False
 
-    def acquire_attacker(self,reset=False,diff=0):
+    def acquire_attacker(self,reset=False,acq_cl=False,diff=0):
         if reset:
             for i,v in enumerate(self.controlled_vehicles):
                 if i < self.config["n_defenders"]:
@@ -189,18 +191,23 @@ class HighwayEnv(AbstractEnv):
         # Rank 1: defender set on side lane and attacker set on near lane of defender for a fixed distance level 0-3 5 11 20 30
         # Rank 2: defender set on random lane and attcker set behind defender on random lane but not on same lane for a fixed distance, level 0-3 5 11 20 30
         # Rank 3: no special reset
-        if reset:
+        if reset & acq_cl:
             if diff > 1:
                 diff = 1
+            ####train_set####
             distance = 10 + 20*diff
-            #test lane change
-            #distance = 10
+            ####render_set####
+            #distance = 30
             set_attacker_id = np.random.randint(self.config["n_attackers"])
             self.controlled_vehicles[0].position[1] = random.choice([0,1,2,3])
             #print("att_id:",set_attacker_id)
             
             self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position = copy.deepcopy(self.controlled_vehicles[0].position)
-            self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position[0] -= distance
+            ####behind cl
+            #self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position[0] -= distance
+            ####around cl
+            self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position[0] = self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position[0] + random.choice([-1,1])*distance
+            
             #print(self.controlled_vehicles[0].position)
             #print( self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position)
             #print("att:",self.controlled_vehicles[self.config["n_defenders"] + set_attacker_id].position)
@@ -306,7 +313,12 @@ class HighwayEnv(AbstractEnv):
         if np.all(defender_done) and (not np.any(attacker_done)):
             ad_rew=2
         elif np.all(defender_done):
-            ad_rew = 0.6
+            print(self.dif)
+            if self.dif:
+                ad_rew = 1 - self.dif
+                print("dif@advrew:",self.dif)
+            else:
+                ad_rew = 1
         #elif np.any(defender_done):
         #    ad_rew = 0.2
         else:

@@ -134,8 +134,11 @@ class IDMAgent():
                         IDMaction = 2
                         print("botlane change")
                     '''
-                    flaw_list = [0,2]
-                    IDMaction = flaw_list[np.random.randint(0,2)]
+                    ###no force change lane
+                    pass
+                    #real random
+                    #flaw_list = [0,2]
+                    #IDMaction = flaw_list[np.random.randint(0,2)]
                     #print("flaw change")
                 '''
                 #easymode
