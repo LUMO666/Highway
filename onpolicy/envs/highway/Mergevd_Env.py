@@ -7,7 +7,7 @@ from copy import deepcopy
 from pathlib import Path
 import os
 
-class HighwayEnv(gym.core.Wrapper):
+class MergevdEnv(gym.core.Wrapper):
     def __init__(self, all_args):
         self.all_args = all_args
 
@@ -68,6 +68,7 @@ class HighwayEnv(gym.core.Wrapper):
             self.train_start_idx = 0
         else:
             raise NotImplementedError
+
         self.env_dict={
             "id": self.scenario_name,
             "import_module": "onpolicy.envs.highway.highway_env",
@@ -122,7 +123,7 @@ class HighwayEnv(gym.core.Wrapper):
         if self.n_other_agents > 0:
             self.load_other_agents()
 
-
+        print("dummies:",self.n_dummies)
         if self.n_dummies > 0:
             self.load_dummies()
         
@@ -359,21 +360,33 @@ class HighwayEnv(gym.core.Wrapper):
             # 1. train obs
             obs = np.array([np.concatenate(all_obs[self.train_start_idx + agent_id]) for agent_id in range(self.n_agents)])
             if self.task_type == "attack":
+                if self.n_dummies!=0:
+                    ob = []
+                    for n, o in enumerate(obs):
+                        o = np.concatenate(
+                            (o,
+                             defender_pos - infos["position"][n + self.n_defenders],
+                             np.array([defender_speed - infos["speed"][n + self.n_defenders]]),
+                             np.concatenate(npc_pos - infos["position"][n + self.n_defenders]),
+                             np.array(npc_speed) - infos["speed"][n + self.n_defenders],
+                             )
+                        )
 
-                ob = []
-                for n, o in enumerate(obs):
-                    o = np.concatenate(
-                        (o,
-                         defender_pos - infos["position"][n + self.n_defenders],
-                         np.array([defender_speed - infos["speed"][n + self.n_defenders]]),
-                         np.concatenate(npc_pos - infos["position"][n + self.n_defenders]),
-                         np.array(npc_speed) - infos["speed"][n + self.n_defenders],
-                         )
-                    )
-
-                    ob.append(o)
-                obs = np.array(ob)
-
+                        ob.append(o)
+                    obs = np.array(ob)
+                else:
+                    defender_pos = infos["position"][0]
+                    defender_speed = infos["speed"][0]
+                    ob = []
+                    for n, o in enumerate(obs):
+                        o = np.concatenate(
+                            (o,
+                             defender_pos - infos["position"][n + self.n_defenders],
+                             np.array([defender_speed - infos["speed"][n + self.n_defenders]]),
+                             )
+                        )
+                        ob.append(o)
+                    obs = np.array(ob)
             
             # 2. other obs
             self.other_obs = np.array([np.concatenate(all_obs[self.load_start_idx + agent_id]) \
@@ -546,29 +559,39 @@ class HighwayEnv(gym.core.Wrapper):
             # deal with agents that need to train
             obs = np.array([np.concatenate(all_obs[self.train_start_idx + agent_id]) for agent_id in range(self.n_agents)])
             if self.task_type=="attack":
-                defender_pos = infos["position"][0]
-                defender_speed = infos["speed"][0]
-                npc_pos = infos["npc_position"]
-                npc_speed = infos["npc_speed"]
-                print("npc_pos:",len(npc_pos))
-                print("infopos:",len(infos["position"]))
+                if self.n_dummies!=0:
+                    defender_pos = infos["position"][0]
+                    defender_speed = infos["speed"][0]
+                    npc_pos = infos["npc_position"]
+                    npc_speed = infos["npc_speed"]
+                    ob = []
+                    for n, o in enumerate(obs):
 
+                        o = np.concatenate(
+                            (o,
+                             defender_pos - infos["position"][n + self.n_defenders],
+                             np.array([defender_speed - infos["speed"][n + self.n_defenders]]),
+                             np.concatenate(npc_pos-infos["position"][n + self.n_defenders]),
+                             np.array(npc_speed) - infos["speed"][n + self.n_defenders],
+                             )
+                        )
 
-                ob = []
-                for n, o in enumerate(obs):
+                        ob.append(o)
+                    obs = np.array(ob)
+                else:
+                    defender_pos = infos["position"][0]
+                    defender_speed = infos["speed"][0]
+                    ob = []
+                    for n, o in enumerate(obs):
 
-                    o = np.concatenate(
-                        (o,
-                         defender_pos - infos["position"][n + self.n_defenders],
-                         np.array([defender_speed - infos["speed"][n + self.n_defenders]]),
-                         np.concatenate(npc_pos-infos["position"][n + self.n_defenders]),
-                         np.array(npc_speed) - infos["speed"][n + self.n_defenders],
-                         )
-                    )
-
-                    ob.append(o)
-                obs = np.array(ob)
-
+                        o = np.concatenate(
+                            (o,
+                             defender_pos - infos["position"][n + self.n_defenders],
+                             np.array([defender_speed - infos["speed"][n + self.n_defenders]]),
+                             )
+                        )
+                        ob.append(o)
+                    obs = np.array(ob)
             self.current_step += 1
 
             if self.use_render_vulnerability:
