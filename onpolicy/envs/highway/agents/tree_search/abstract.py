@@ -158,7 +158,7 @@ class AbstractPlanner(Configurable):
         return actions
 
     def step(self, state, action):
-        observation, reward, done, info = state.step(action)
+        observation, reward, done, info = state.step(action)[0:4]
         self.observations.append(observation)
         return observation, reward, done, info
 

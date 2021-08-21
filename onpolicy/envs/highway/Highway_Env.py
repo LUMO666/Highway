@@ -207,6 +207,24 @@ class HighwayEnv(gym.core.Wrapper):
                                    config=agent_config,
                                    vehicle_id=agent_id)
                 self.other_agents.append(dummy)
+        elif self.other_agent_type == "rvi":
+            from .agents.dynamic_programming.robust_value_iteration import RobustValueIterationAgent as DummyAgent
+            agent_config = {"env_preprocessors": [{"method": "simplify"}], "budget": 50}
+            self.other_agents = []
+            for agent_id in range(self.n_other_agents):
+                dummy = DummyAgent(env=self.env_init,
+                                   config=agent_config,
+                                   vehicle_id=agent_id)
+                self.other_agents.append(dummy)
+        elif self.other_agent_type == "mcts":
+            from .agents.tree_search.mcts import MCTSAgent as DummyAgent 
+            agent_config = {"max_depth": 1, "budget": 200, "temperature": 200} 
+            self.other_agents = []
+            for agent_id in range(self.n_other_agents):
+                dummy = DummyAgent(env=self.env_init,
+                                   config=agent_config,
+                                   vehicle_id=agent_id)
+                self.other_agents.append(dummy)
         elif self.other_agent_type == "IDM":
             print("load IDM")
             from .agents.dynamic_programming.IDM import IDMAgent as DummyAgent
@@ -265,10 +283,26 @@ class HighwayEnv(gym.core.Wrapper):
                         action = np.concatenate([action, other_actions])
                     else:
                         action = np.concatenate([other_actions, action])
+                if self.other_agent_type == "rvi":
+                    other_actions = []
+                    for other_id in range(self.n_other_agents):
+                        other_actions.append([self.other_agents[other_id].act(self.other_obs[other_id])])
+                    if self.train_start_idx == 0:
+                        action = np.concatenate([action, other_actions])
+                    else:
+                        action = np.concatenate([other_actions, action])
                 elif self.other_agent_type == "IDM":
                     other_actions = []
                     for other_id in range(self.n_other_agents):
                         other_actions.append([self.other_agents[other_id].act(self.env)])
+                    if self.train_start_idx == 0:
+                        action = np.concatenate([action, other_actions])
+                    else:
+                        action = np.concatenate([other_actions, action])
+                elif self.other_agent_type == "mcts":
+                    other_actions = []
+                    for other_id in range(self.n_other_agents):
+                        other_actions.append([self.other_agents[other_id].act(self.other_obs[other_id])])
                     if self.train_start_idx == 0:
                         action = np.concatenate([action, other_actions])
                     else:
@@ -446,7 +480,6 @@ class HighwayEnv(gym.core.Wrapper):
                     if i<self.n_defenders or i>=self.n_defenders+self.n_attackers:
                         continue
                     elif v.crashed and v._is_colliding(self.controlled_vehicles[0]):
-                        print(v.action['acceleration'])
                         if len(self.controlled_vehicles_trajectory)>2 :
                             #self.attack_succeed=(self.attack_succeed and np.abs(v.heading)<3.14/36 and np.abs(v.action['acceleration'])<0.5 and np.abs(self.controlled_vehicles_trajectory[-1][i].action['acceleration'])<0.5 and np.abs(self.controlled_vehicles_trajectory[-2][i].action['acceleration'])<0.5 and np.abs(self.controlled_vehicles_trajectory[-1][i].heading)<3.14/36)
                             self.attack_succeed=(self.attack_succeed and (v.lane_index[2]\
