@@ -173,15 +173,15 @@ class MergevdEnv(AbstractEnv):
         ins=[]
         ins_npc=[]
         npc_bubble=self.config["available_npc_bubble"]
-        print(len(dis_sort))
-        print(npc_bubble)
+        #print(len(dis_sort))
+        #print(npc_bubble)
         self.npcs_in_bubble=[]
 
         dis_in_bubble=deepcopy(dis_sort[:self.config["n_attackers"] - 1 + npc_bubble])
         #attacker_dis=random.sample(dis_in_bubble,self.config["n_attackers"])
         #attacker_dis do not contain merge_vehicle
         attacker_dis = dis_in_bubble[:self.config["n_attackers"]-1]
-        print(len(dis_in_bubble))
+        #print(len(dis_in_bubble))
         npc_dis=[x for x in dis_in_bubble if (x not in attacker_dis) and (x != np.linalg.norm(self.road.vehicles[1].position - defender_pos))]
 
         # ins for attackers, ins_npc for npc in bubble
@@ -189,8 +189,8 @@ class MergevdEnv(AbstractEnv):
             ins.append(dis.index(attacker_dis[i]))
         #ins = [index of chosen att in self.road.vehicles by distance]
         for i in range(npc_bubble):
-            print(i)
-            print(len(npc_dis))
+            #print(i)
+            #print(len(npc_dis))
             ins_npc.append(dis.index(npc_dis[i]))
         #ins_npc = [index of chosen npc in self.road.vehicles by distance]
         ##we must first define the attacker
@@ -198,7 +198,7 @@ class MergevdEnv(AbstractEnv):
         #take merge_vehicle as 1st att
         if reset:
             self.road.vehicles[self.config["n_defenders"] + 1].use_action_level_behavior = True
-            print("contorlled_v1:",len(self.controlled_vehicles))
+            #print("contorlled_v1:",len(self.controlled_vehicles))
             self.controlled_vehicles[1+self.config["n_defenders"]]=self.road.vehicles[self.config["n_defenders"] + 1]
         else:
             self.controlled_vehicles[1 + self.config["n_defenders"]].use_action_level_behavior=False
@@ -220,8 +220,8 @@ class MergevdEnv(AbstractEnv):
         for i,index in enumerate(ins_npc):
             if reset:
                 self.road.vehicles[self.config["n_defenders"] + 1 + index].use_action_level_behavior = True
-                print(len(self.road.vehicles))
-                print(self.config["n_defenders"] + 1 + index)
+                #print(len(self.road.vehicles))
+                #print(self.config["n_defenders"] + 1 + index)
                 self.controlled_vehicles[i + self.config["n_defenders"]+self.config["n_attackers"]] = self.road.vehicles[
                     self.config["n_defenders"] + 1 + index]
             else:
@@ -326,7 +326,7 @@ class MergevdEnv(AbstractEnv):
         lateral=np.abs(dis[1])
         lp=4
         x=np.power(np.power(longitudinal,lp)+np.power(2.5*lateral,lp),1/lp)-10
-        reward=(self.sigmoid(x)*(1-self.sigmoid(x))*4.-0.5)
+        reward=(self.sigmoid(x)*(1-self.sigmoid(x))*4.-0.5)*0.3
         return reward
 
     def dis_rew(self) :#-> bool:
