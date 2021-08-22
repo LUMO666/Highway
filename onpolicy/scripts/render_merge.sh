@@ -7,9 +7,9 @@ n_attackers=2
 
 n_dummies=0
 algo="rmappo"
-exp="08019_ppodef_liuwl_2attacker_dis_rew_intention_5adv_merge"
+exp="08019_d3qndef_liuwl_2attacker_dis_rew_intention_5adv_merge"
 seed_max=2
-model_dir="/home/tsing89/Highway/onpolicy/scripts/results/Merge/mergevd-v0/rmappo/08019_ppodef_liuwl_2attacker_dis_rew_intention_5adv_merge/wandb/run-20210820_190749-1x6xvai1/files"
+model_dir="/home/tsing89/Highway/onpolicy/scripts/results/Merge/mergevd-v0/rmappo/08019_ppodef_liuwl_2attacker_dis_rew_intention_5adv_merge/wandb/run-20210820_201634-mk2xlgm1"
 
 echo "env is ${env}"
 for seed in `seq ${seed_max}`
