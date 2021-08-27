@@ -6,11 +6,12 @@ from onpolicy.envs.highway.common.factory import load_environment
 from copy import deepcopy
 from pathlib import Path
 import os
+import pdb
 
-class MergevdEnv(gym.core.Wrapper):
+class RoundaboutvdEnv(gym.core.Wrapper):
     def __init__(self, all_args):
         self.all_args = all_args
-
+        #print("all_args:",all_args)
         # render parameters
         self.use_offscreen_render = all_args.use_offscreen_render
         self.use_render_vulnerability = all_args.use_render_vulnerability
@@ -68,7 +69,7 @@ class MergevdEnv(gym.core.Wrapper):
             self.train_start_idx = 0
         else:
             raise NotImplementedError
-       
+
         self.env_dict={
             "id": self.scenario_name,
             "import_module": "onpolicy.envs.highway.highway_env",
@@ -108,10 +109,10 @@ class MergevdEnv(gym.core.Wrapper):
         self.env_init = load_environment(self.env_dict)
         
         super().__init__(self.env_init)
+        #print(self.observation_space)
         # get new obs and action space
         self.all_observation_space = []
         self.all_action_space = []
-        
         for agent_id in range(self.n_attackers + self.n_defenders + self.n_dummies):
             obs_shape = list(self.observation_space[agent_id].shape)
             self.obs_dim = reduce(lambda x, y: x*y, obs_shape)

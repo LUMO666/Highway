@@ -2,6 +2,7 @@ from typing import List, Dict, TYPE_CHECKING, Optional, Union
 from gym import spaces
 import numpy as np
 import pandas as pd
+import pdb
 
 from onpolicy.envs.highway.highway_env import utils
 from onpolicy.envs.highway.highway_env.envs.common.finite_mdp import compute_ttc_grid

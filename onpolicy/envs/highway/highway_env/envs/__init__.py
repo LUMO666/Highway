@@ -7,3 +7,4 @@ from onpolicy.envs.highway.highway_env.envs.two_way_env import *
 from onpolicy.envs.highway.highway_env.envs.intersection_env import *
 from onpolicy.envs.highway.highway_env.envs.lane_keeping_env import *
 from onpolicy.envs.highway.highway_env.envs.mergevd_env import *
+from onpolicy.envs.highway.highway_env.envs.roundaboutvd_env import *
