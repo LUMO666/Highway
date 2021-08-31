@@ -9,7 +9,7 @@ n_dummies=0
 algo="rmappo"
 exp="08018_ppodef_liuwl_2attacker_dis_rew_intention_5adv"
 seed_max=2
-model_dir="/home/tsing89/Highway/onpolicy/scripts/results/Highway/highway-v0/rmappo/08018_ppodef_liuwl_2attacker_dis_rew_intention_5adv/wandb/run-20210818_042923-3bg5gbg4/files"
+model_dir="/home/tsing89/Highway/onpolicy/scripts/results/Highway/highway-v0/rmappo/08018_ppodef_liuwl_2attacker_dis_rew_intention_5adv/wandb/run-20210818_230201-1v8wfjpm/files"
 
 echo "env is ${env}"
 for seed in `seq ${seed_max}`

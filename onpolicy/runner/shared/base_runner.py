@@ -131,15 +131,15 @@ class Runner(object):
         self.buffer.after_update()
         return train_infos
 
-    def save(self):
+    def save(self,episode):
         if self.use_single_network:
             policy_model = self.trainer.policy.model
-            torch.save(policy_model.state_dict(), str(self.save_dir) + "/model.pt")
+            torch.save(policy_model.state_dict(), str(self.save_dir) + "/model"+str(episode)+".pt")
         else:
             policy_actor = self.trainer.policy.actor
-            torch.save(policy_actor.state_dict(), str(self.save_dir) + "/actor.pt")
+            torch.save(policy_actor.state_dict(), str(self.save_dir) + "/actor"+str(episode)+".pt")
             policy_critic = self.trainer.policy.critic
-            torch.save(policy_critic.state_dict(), str(self.save_dir) + "/critic.pt")
+            torch.save(policy_critic.state_dict(), str(self.save_dir) + "/critic"+str(episode)+".pt")
 
     def restore(self):
         if self.use_single_network:

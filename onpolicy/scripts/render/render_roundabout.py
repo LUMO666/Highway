@@ -31,7 +31,7 @@ def make_render_env(all_args):
 
 def parse_args(args, parser):
     parser.add_argument('--scenario_name', type=str,
-                        default='merge-vd', help="Which scenario to run on")
+                        default='roundabout-v0', help="Which scenario to run on")
 
     parser.add_argument('--task_type', type=str,
                         default='attack', choices = ["attack","defend","all"], 

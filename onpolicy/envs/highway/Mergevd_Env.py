@@ -207,6 +207,15 @@ class MergevdEnv(gym.core.Wrapper):
                                    config=agent_config,
                                    vehicle_id=agent_id)
                 self.other_agents.append(dummy)
+        elif self.other_agent_type == 'rvi':
+            from .agents.dynamic_programming.robust_value_iteration import RobustValueIterationAgent as DummyAgent
+            agent_config = {"env_preprocessors": [{"method": "simplify"}], "budget": 50}
+            self.other_agents = []
+            for agent_id in range(self.n_other_agents):
+                dummy = DummyAgent(env=self.env_init,
+                                   config=agent_config,
+                                   vehicle_id=agent_id)
+                self.other_agents.append(dummy)
         elif self.other_agent_type == "IDM":
             print("load IDM")
             from .agents.dynamic_programming.IDM import IDMAgent as DummyAgent
@@ -267,6 +276,14 @@ class MergevdEnv(gym.core.Wrapper):
             # we need to get actions of other agents
             if self.n_other_agents > 0:
                 if self.other_agent_type == "vi":
+                    other_actions = []
+                    for other_id in range(self.n_other_agents):
+                        other_actions.append([self.other_agents[other_id].act(self.other_obs[other_id])])
+                    if self.train_start_idx == 0:
+                        action = np.concatenate([action, other_actions])
+                    else:
+                        action = np.concatenate([other_actions, action])
+                elif self.other_agent_type == 'rvi':
                     other_actions = []
                     for other_id in range(self.n_other_agents):
                         other_actions.append([self.other_agents[other_id].act(self.other_obs[other_id])])
