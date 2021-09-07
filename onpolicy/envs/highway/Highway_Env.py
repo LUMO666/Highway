@@ -102,6 +102,7 @@ class HighwayEnv(gym.core.Wrapper):
             "reward_speed_range": [20, self.reward_highest_speed],
             "available_npc_bubble":self.available_npc_bubble,
             "bubble_length":self.bubble_length,
+            "seed":all_args.seed
         }
         
         self.env_init = load_environment(self.env_dict)
@@ -463,7 +464,7 @@ class HighwayEnv(gym.core.Wrapper):
                     if i<self.n_defenders or i>=self.n_defenders+self.n_attackers:
                         continue
                     elif v.crashed and v._is_colliding(self.controlled_vehicles[0]):
-                        print(v.action['acceleration'])
+                        #print(v.action['acceleration'])
                         if len(self.controlled_vehicles_trajectory)>2 :
                             #self.attack_succeed=(self.attack_succeed and np.abs(v.heading)<3.14/36 and np.abs(v.action['acceleration'])<0.5 and np.abs(self.controlled_vehicles_trajectory[-1][i].action['acceleration'])<0.5 and np.abs(self.controlled_vehicles_trajectory[-2][i].action['acceleration'])<0.5 and np.abs(self.controlled_vehicles_trajectory[-1][i].heading)<3.14/36)
                             self.attack_succeed=(self.attack_succeed and (v.lane_index[2]\
@@ -479,7 +480,7 @@ class HighwayEnv(gym.core.Wrapper):
             else:
                 self.c_v=deepcopy(self.controlled_vehicles)
                 self.controlled_vehicles_trajectory.append(self.c_v)
-            
+            #print('action:',action)
             #print(self.controlled_vehicles[1].action['acceleration'])
             #print(self.controlled_vehicles[2].action['acceleration'])
 
@@ -550,8 +551,8 @@ class HighwayEnv(gym.core.Wrapper):
                 defender_speed = infos["speed"][0]
                 npc_pos = infos["npc_position"]
                 npc_speed = infos["npc_speed"]
-                print("npc_pos:",len(npc_pos))
-                print("infopos:",len(infos["position"]))
+                #print("npc_pos:",len(npc_pos))
+                #print("infopos:",len(infos["position"]))
 
 
                 ob = []

@@ -50,6 +50,7 @@ class MergevdEnv(AbstractEnv):
         return config
 
     def _reset(self) -> None:
+        random.seed(self.config["seed"])
         self.use_bubble = False
         self.max_bubble_length = self.config["bubble_length"] 
         self._create_road()
@@ -100,6 +101,7 @@ class MergevdEnv(AbstractEnv):
         self.controlled_vehicles = [defender vehicle, merge_vehicle, other attackers]
 
         """
+        position_deviation = 10
         self.controlled_vehicles = []
         road = self.road
         ego_vehicle = self.action_type.vehicle_class(road,
@@ -109,24 +111,24 @@ class MergevdEnv(AbstractEnv):
         self.controlled_vehicles.append(ego_vehicle)
 
         npc_vehicles_type = utils.class_from_path(self.config["npc_vehicles_type"])
-        merging_v = self.action_type.vehicle_class(road, road.network.get_lane(("j", "k", 0)).position(110, 0), speed=20)
+        merging_v = self.action_type.vehicle_class(road, road.network.get_lane(("j", "k", 0)).position(60, 0), speed=30)
         merging_v.target_speed = 30
         self.controlled_vehicles.append(merging_v)
         road.vehicles.append(merging_v)
 
-        vehicle = self.action_type.vehicle_class(road, road.network.get_lane(("a", "b", 0)).position(90, 0), speed=29)
+        vehicle = self.action_type.vehicle_class(road, road.network.get_lane(("a", "b", random.choice([0,1]))).position(110+2*(random.random()-0.5)*position_deviation, 0), speed=29)
         self.controlled_vehicles.append(vehicle)
         road.vehicles.append(vehicle)
 
-        vehicle = self.action_type.vehicle_class(road, road.network.get_lane(("a", "b", 1)).position(70, 0), speed=31)
+        vehicle = self.action_type.vehicle_class(road, road.network.get_lane(("a", "b", 1)).position(60+2*(random.random()-0.5)*position_deviation, 0), speed=31)
         self.controlled_vehicles.append(vehicle)
         road.vehicles.append(vehicle)
 
-        vehicle = self.action_type.vehicle_class(road, road.network.get_lane(("a", "b", 0)).position(5, 0), speed=31.5)
+        vehicle = self.action_type.vehicle_class(road, road.network.get_lane(("a", "b", 0)).position(130, 0), speed=31.5)
         self.controlled_vehicles.append(vehicle)
         road.vehicles.append(vehicle)
 
-        road.vehicles.append(npc_vehicles_type(road, road.network.get_lane(("a", "b", 0)).position(90, 0), speed=28.5))
+        road.vehicles.append(npc_vehicles_type(road, road.network.get_lane(("a", "b", 0)).position(70, 0), speed=28.5))
 
         road.vehicles.append(npc_vehicles_type(road, road.network.get_lane(("a", "b", 1)).position(10, 0), speed=31.5))
 

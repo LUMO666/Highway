@@ -103,6 +103,7 @@ class MergevdEnv(gym.core.Wrapper):
             "reward_speed_range": [20, self.reward_highest_speed],
             "available_npc_bubble":self.available_npc_bubble,
             "bubble_length":self.bubble_length,
+            "seed":all_args.seed
         }
         
         self.env_init = load_environment(self.env_dict)

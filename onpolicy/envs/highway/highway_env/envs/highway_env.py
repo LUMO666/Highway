@@ -25,6 +25,7 @@ class HighwayEnv(AbstractEnv):
 
     LANE_CHANGE_REWARD: float = 0
     """The reward received at each lane change action."""
+    
 
     def default_config(self) -> dict:
         config = super().default_config()
@@ -49,7 +50,7 @@ class HighwayEnv(AbstractEnv):
         return config
 
     def _reset(self) -> None:
-
+        random.seed(self.config["seed"])
         ######## Jianming Jan 29 New feature -> bubble test: control handover
         self.use_bubble = False
         self.max_bubble_length = self.config["bubble_length"]   ####max_length_bubble

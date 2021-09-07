@@ -53,6 +53,7 @@ class RoundaboutvdEnv(AbstractEnv):
         return config
 
     def _reset(self) -> None:
+        random.seed(self.config["seed"])
         self.use_bubble = False
         self.max_bubble_length = self.config["bubble_length"] 
         self._create_road()
@@ -138,7 +139,7 @@ class RoundaboutvdEnv(AbstractEnv):
         self.controlled_vehicles = [defender vehicle, merge_vehicle, other attackers]
 
         """
-        position_deviation = 2
+        position_deviation = 20
         speed_deviation = 2
 
         self.controlled_vehicles = []
@@ -151,7 +152,7 @@ class RoundaboutvdEnv(AbstractEnv):
                                                      speed=8,
                                                      heading=ego_lane.heading_at(140))
         try:
-            ego_vehicle.plan_route_to("nxs")
+            ego_vehicle.plan_route_to("wxs")
         except AttributeError:
             pass
         MDPVehicle.SPEED_MIN = 0
@@ -165,27 +166,42 @@ class RoundaboutvdEnv(AbstractEnv):
         npc_vehicles_type = utils.class_from_path(self.config["npc_vehicles_type"])
 
         for i in range(self.config['n_attackers']):
-
-            vehicle = self.action_type.vehicle_class(road,
-                                                       road.network.get_lane(("we", "sx", 0)).position(
+            '''vehicle = self.action_type.vehicle_class(road,
+                                                       road.network.get_lane(("ne", "wx", i)).position(
                                                        20*(i+1) + 2*(random.random()-0.5)*position_deviation,0),
-                                                       speed=16 + 2*(random.random()-0.5) * speed_deviation)
+                                                       speed=16 + 2*(random.random()-0.5) * speed_deviation,
+                                                       heading=2-i*0.5)'''
+            '''attacker_lane=road.network.get_lane(("we", "sx", i))
+            local_position=20*(i+1) + 2*(random.random()-0.5)*position_deviation
+            Position=attacker_lane.position(local_position,0)
+            vehicle = self.action_type.vehicle_class(road,
+                                                       Position,
+                                                       speed=16 + 2*(random.random()-0.5) * speed_deviation,
+                                                       heading=attacker_lane.heading_at(local_position))'''
+            attacker_lane=road.network.get_lane(("sx","se",random.randint(0,1)))
+            local_position=2*(random.random()-0.5)*position_deviation
+            Position=attacker_lane.position(local_position,0)                                           
+            vehicle = self.action_type.vehicle_class(road,
+                                                       Position,
+                                                       speed=16 + 2*(random.random()-0.5) * speed_deviation,
+                                                       heading=attacker_lane.heading_at(local_position))
             vehicle.use_action_level_behavior = True
             self.controlled_vehicles.append(vehicle)
             road.vehicles.append(vehicle)
         
         for i in list(range(-1, 0)):
             vehicle = npc_vehicles_type.make_on_lane(self.road,
-                                                       ("we", "sx", 0),
+                                                       ("ne", "wx", 0),
                                                        longitudinal=20*i + 2*(random.random()-0.5)*position_deviation,
                                                        speed=16 + 2*(random.random()-0.5) * speed_deviation)
-            vehicle.plan_route_to(random.choice(destinations))
+            #vehicle.plan_route_to(random.choice(destinations))
+            vehicle.plan_route_to("wxr")
             vehicle.randomize_behavior()
             self.road.vehicles.append(vehicle)
 
         # Incoming vehicle
         vehicle = npc_vehicles_type.make_on_lane(self.road,
-                                                   ("we", "sx", 1),
+                                                   ("ee", "nx", 1),
                                                    longitudinal=5 + 2*(random.random()-0.5)*position_deviation,
                                                    speed=16 + 2*(random.random()-0.5) * speed_deviation)
 
@@ -194,18 +210,19 @@ class RoundaboutvdEnv(AbstractEnv):
         else:
             destination = random.choice(destinations)
         
-        vehicle.plan_route_to(destination)
+        #vehicle.plan_route_to(destination)
+        vehicle.plan_route_to("wxr")
         vehicle.randomize_behavior()
         self.road.vehicles.append(vehicle)
 
         # Entering vehicle
-        vehicle = npc_vehicles_type.make_on_lane(self.road,
+        '''vehicle = npc_vehicles_type.make_on_lane(self.road,
                                                    ("eer", "ees", 0),
                                                    longitudinal=50 + 2*(random.random()-0.5) * position_deviation,
                                                    speed=16 + 2*(random.random()-0.5) * speed_deviation)
         vehicle.plan_route_to(random.choice(destinations))
         vehicle.randomize_behavior()
-        self.road.vehicles.append(vehicle)
+        self.road.vehicles.append(vehicle)'''
         #self.define_spaces()
         #self.vehicle = ego_vehicle
 
@@ -273,7 +290,7 @@ class RoundaboutvdEnv(AbstractEnv):
         ##we must first define the attacker
         
         #take merge_vehicle as 1st att
-        if reset:
+        '''if reset:
             self.road.vehicles[self.config["n_defenders"] + 2].use_action_level_behavior = True
             #print("contorlled_v1:",len(self.controlled_vehicles))
             self.controlled_vehicles[1+self.config["n_defenders"]]=self.road.vehicles[self.config["n_defenders"] + 1]
@@ -292,7 +309,19 @@ class RoundaboutvdEnv(AbstractEnv):
                 self.controlled_vehicles[i + 1 + self.config["n_defenders"]]=self.road.vehicles[self.config["n_defenders"] + index + 1]
             #for render, exchange the index in the list
             self.road.vehicles[self.config["n_defenders"] + 1 + index],self.road.vehicles[self.config["n_defenders"] + i + 1]=\
-            self.road.vehicles[self.config["n_defenders"] + i + 1],self.road.vehicles[self.config["n_defenders"] + index + 1]
+            self.road.vehicles[self.config["n_defenders"] + i + 1],self.road.vehicles[self.config["n_defenders"] + index + 1]'''
+        
+        for i,index in enumerate(ins):
+            if reset:
+                self.road.vehicles[self.config["n_defenders"] + index].use_action_level_behavior = True
+                self.controlled_vehicles[i+self.config["n_defenders"]]=self.road.vehicles[self.config["n_defenders"] + index]
+            else:
+                self.controlled_vehicles[i + self.config["n_defenders"]].use_action_level_behavior=False
+                self.road.vehicles[self.config["n_defenders"] + index].use_action_level_behavior = True
+                self.controlled_vehicles[i+self.config["n_defenders"]]=self.road.vehicles[self.config["n_defenders"]+index]
+            #for render, exchange the index in the list
+            self.road.vehicles[self.config["n_defenders"] + index],self.road.vehicles[self.config["n_defenders"] + i]=\
+            self.road.vehicles[self.config["n_defenders"] + i],self.road.vehicles[self.config["n_defenders"] + index]
 
         for i,index in enumerate(ins_npc):
             if reset:

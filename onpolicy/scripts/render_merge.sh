@@ -7,14 +7,14 @@ n_attackers=2
 
 n_dummies=0
 algo="rmappo"
-exp="08019_d3qndef_liuwl_2attacker_dis_rew_intention_5adv_merge"
+exp="0829_d3qndef_muye_2attacker_dis_rew_intention_5adv_merge"
 seed_max=2
-model_dir="/home/tsing89/Highway/onpolicy/scripts/results/Merge/mergevd-v0/rmappo/08019_ppodef_liuwl_2attacker_dis_rew_intention_5adv_merge/wandb/run-20210820_201634-mk2xlgm1"
+model_dir="/home/tsing92/Highway/onpolicy/scripts/results/Merge/mergevd-v0/rmappo/0826_dqnndef_new_pm_muye_2attacker_dis_rew_intention_5adv_merge/wandb/run-20210827_000114-32b4ypt3/files"
 
 echo "env is ${env}"
 for seed in `seq ${seed_max}`
 do
 
-    CUDA_VISIBLE_DEVICES=0 python render/render_merge.py --env_name ${env} --algorithm_name ${algo} --experiment_name ${exp} --scenario_name ${scenario} --task_type ${task} --n_attackers ${n_attackers} --n_defenders ${n_defenders} --n_dummies ${n_dummies} --seed ${seed} --load_train_config --n_training_threads 1 --n_render_rollout_threads 1 --horizon 40 --use_render --use_wandb --other_agent_type "d3qn" --other_agent_policy_path "../envs/highway/agents/policy_pool/dqn/model/dueling_ddqn_obs25_act5_baseline.tar" --model_dir ${model_dir}  --render_episodes 20 --npc_vehicles_type "onpolicy.envs.highway.highway_env.vehicle.controller_replay.MDPVehicle_IDMVehicle" --dummy_agent_type "vi" --save_gifs
+    CUDA_VISIBLE_DEVICES=0 python render/render_merge.py --env_name ${env} --algorithm_name ${algo} --experiment_name ${exp} --scenario_name ${scenario} --task_type ${task} --n_attackers ${n_attackers} --n_defenders ${n_defenders} --n_dummies ${n_dummies} --seed ${seed} --load_train_config --n_training_threads 1 --n_render_rollout_threads 1 --horizon 15 --use_render --use_wandb --other_agent_type "d3qn" --other_agent_policy_path "/home/tsing92/Highway/onpolicy/envs/highway/agents/policy_pool/dqn/model/d3qn_merge.tar" --model_dir ${model_dir}  --render_episodes 20 --npc_vehicles_type "onpolicy.envs.highway.highway_env.vehicle.controller_replay.MDPVehicle_IDMVehicle" --dummy_agent_type "vi" --save_gifs
 
 done

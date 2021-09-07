@@ -104,6 +104,7 @@ class RoundaboutvdEnv(gym.core.Wrapper):
             "reward_speed_range": [20, self.reward_highest_speed],
             "available_npc_bubble":self.available_npc_bubble,
             "bubble_length":self.bubble_length,
+            "seed":all_args.seed
         }
         
         self.env_init = load_environment(self.env_dict)
@@ -208,6 +209,15 @@ class RoundaboutvdEnv(gym.core.Wrapper):
                                    config=agent_config,
                                    vehicle_id=agent_id)
                 self.other_agents.append(dummy)
+        elif self.other_agent_type == "rvi":
+            from .agents.dynamic_programming.robust_value_iteration import RobustValueIterationAgent as DummyAgent
+            agent_config = {"env_preprocessors": [{"method": "simplify"}], "budget": 50}
+            self.other_agents = []
+            for agent_id in range(self.n_other_agents):
+                dummy = DummyAgent(env=self.env_init,
+                                   config=agent_config,
+                                   vehicle_id=agent_id)
+                self.other_agents.append(dummy)
         elif self.other_agent_type == "IDM":
             print("load IDM")
             from .agents.dynamic_programming.IDM import IDMAgent as DummyAgent
@@ -268,6 +278,14 @@ class RoundaboutvdEnv(gym.core.Wrapper):
             # we need to get actions of other agents
             if self.n_other_agents > 0:
                 if self.other_agent_type == "vi":
+                    other_actions = []
+                    for other_id in range(self.n_other_agents):
+                        other_actions.append([self.other_agents[other_id].act(self.other_obs[other_id])])
+                    if self.train_start_idx == 0:
+                        action = np.concatenate([action, other_actions])
+                    else:
+                        action = np.concatenate([other_actions, action])
+                elif self.other_agent_type == "rvi":
                     other_actions = []
                     for other_id in range(self.n_other_agents):
                         other_actions.append([self.other_agents[other_id].act(self.other_obs[other_id])])
@@ -477,15 +495,21 @@ class RoundaboutvdEnv(gym.core.Wrapper):
                     if i<self.n_defenders or i>=self.n_defenders+self.n_attackers:
                         continue
                     elif v.crashed and v._is_colliding(self.controlled_vehicles[0]):
-                        print(v.action['acceleration'])
-                        if len(self.controlled_vehicles_trajectory)>2 :
+                        #print(v.action['acceleration'])
+                        if len(self.controlled_vehicles_trajectory)>=1 :
                             #self.attack_succeed=(self.attack_succeed and np.abs(v.heading)<3.14/36 and np.abs(v.action['acceleration'])<0.5 and np.abs(self.controlled_vehicles_trajectory[-1][i].action['acceleration'])<0.5 and np.abs(self.controlled_vehicles_trajectory[-2][i].action['acceleration'])<0.5 and np.abs(self.controlled_vehicles_trajectory[-1][i].heading)<3.14/36)
-                            self.attack_succeed=(self.attack_succeed and (v.lane_index[2]\
-                            ==self.controlled_vehicles_trajectory[-1][i].lane_index[2])\
-                            and (v.lane_index[2]!=self.controlled_vehicles_trajectory[-1][0].lane_index[2])\
-                            and np.abs(v.heading)<3.14/36\
+                            changing_lane_crashed=self.roundabout_is_same_lane(v.lane_index,self.controlled_vehicles_trajectory[-1][i].lane_index)\
+                            and (not self.roundabout_is_same_lane(v.lane_index,self.controlled_vehicles_trajectory[-1][0].lane_index))\
+                            and -0.05>v.action['steering']>-0.3\
                             and np.abs(v.action['acceleration'])<1\
-                            and np.abs(self.controlled_vehicles_trajectory[-1][i].action['acceleration'])<1)
+                            and np.abs(self.controlled_vehicles_trajectory[-1][i].action['acceleration'])<1
+                            front_vehicle, rear_vehicle = self.controlled_vehicles[0].road.neighbour_vehicles(self.controlled_vehicles[0])
+                            rear_end=(v==front_vehicle and np.abs(v.action['acceleration'])<1\
+                            and self.roundabout_is_same_lane(v.lane_index,self.controlled_vehicles_trajectory[-1][0].lane_index)\
+                            and -0.05>v.action['steering']>-0.3)
+                            self.attack_succeed=self.attack_succeed and (changing_lane_crashed or rear_end)
+                            #self.attack_succeed=self.attack_succeed and changing_lane_crashed
+                            #print(changing_lane_crashed,rear_end)
                         else:
                             self.attack_succeed= False
                 if self.attack_succeed:
@@ -493,9 +517,11 @@ class RoundaboutvdEnv(gym.core.Wrapper):
             else:
                 self.c_v=deepcopy(self.controlled_vehicles)
                 self.controlled_vehicles_trajectory.append(self.c_v)
-            
-            #print(self.controlled_vehicles[1].action['acceleration'])
-            #print(self.controlled_vehicles[2].action['acceleration'])
+            #print('action:',action)
+            '''print('speed:',self.controlled_vehicles[0].speed)
+            print('lane:',self.controlled_vehicles[0].target_lane_index)
+            print('steering:',self.controlled_vehicles[0].action['steering'])
+            print('acceleration:',self.controlled_vehicles[0].action['acceleration'])'''
 
             ####adv_rew
             if adv_rew>0:
@@ -531,6 +557,12 @@ class RoundaboutvdEnv(gym.core.Wrapper):
 
         return obs, rewards, dones, infos#, available_actions
 
+    def roundabout_is_same_lane(self,lane1,lane2):
+        lanelist=["se","ex","ee","nx","ne","wx","we","sx"]
+        if (lane1[0] in lanelist) and (lane1[1] in lanelist) and (lane2[0] in lanelist) and (lane2[1] in lanelist) and (lane1[2]==lane2[2]):
+            return True
+        else:
+            return False
     def reset(self, choose = True):
         if choose:
             self.episode_speeds = []

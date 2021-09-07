@@ -18,7 +18,7 @@ from onpolicy.envs.highway.Roundaboutvd_Env import RoundaboutvdEnv
 def make_render_env(all_args):
     def get_env_fn(rank):
         def init_env():
-            if all_args.env_name == "Roundabout":
+            if all_args.env_name == "Roundaboutvd":
                 env = RoundaboutvdEnv(all_args)
             else:
                 print("Can not support the " +
