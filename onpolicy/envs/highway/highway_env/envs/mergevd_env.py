@@ -104,13 +104,23 @@ class MergevdEnv(AbstractEnv):
         self.controlled_vehicles = []
         road = self.road
         ego_vehicle = self.action_type.vehicle_class(road,
-                                                     road.network.get_lane(("a", "b", 1)).position(30, 0),
+                                                     road.network.get_lane(("a", "b", 1)).position(10, 0),
                                                      speed=30)
         road.vehicles.append(ego_vehicle)
         self.controlled_vehicles.append(ego_vehicle)
 
+
+        #common param
+        '''
         npc_vehicles_type = utils.class_from_path(self.config["npc_vehicles_type"])
         merging_v = self.action_type.vehicle_class(road, road.network.get_lane(("j", "k", 0)).position(60, 0), speed=30)
+        merging_v.target_speed = 30
+        self.controlled_vehicles.append(merging_v)
+        road.vehicles.append(merging_v)
+        '''
+        #1 attacker test param
+        npc_vehicles_type = utils.class_from_path(self.config["npc_vehicles_type"])
+        merging_v = self.action_type.vehicle_class(road, road.network.get_lane(("j", "k", 0)).position(90, 0), speed=30)
         merging_v.target_speed = 30
         self.controlled_vehicles.append(merging_v)
         road.vehicles.append(merging_v)
@@ -123,13 +133,22 @@ class MergevdEnv(AbstractEnv):
         self.controlled_vehicles.append(vehicle)
         road.vehicles.append(vehicle)
 
-        vehicle = self.action_type.vehicle_class(road, road.network.get_lane(("a", "b", 0)).position(5, 0), speed=31.5)
+        #common param
+        #vehicle = self.action_type.vehicle_class(road, road.network.get_lane(("a", "b", 0)).position(5, 0), speed=31.5)
+        #1 attacker test param
+        vehicle = self.action_type.vehicle_class(road, road.network.get_lane(("a", "b", 0)).position(130, 0), speed=31.5)
         self.controlled_vehicles.append(vehicle)
         road.vehicles.append(vehicle)
+        #common param
+        #road.vehicles.append(npc_vehicles_type(road, road.network.get_lane(("a", "b", 0)).position(70, 0), speed=28.5))
 
-        road.vehicles.append(npc_vehicles_type(road, road.network.get_lane(("a", "b", 0)).position(70, 0), speed=28.5))
+        #1 attacker test param
+        road.vehicles.append(npc_vehicles_type(road, road.network.get_lane(("a", "b", 0)).position(30, 0), speed=28.5))
 
-        road.vehicles.append(npc_vehicles_type(road, road.network.get_lane(("a", "b", 1)).position(10, 0), speed=31.5))
+        #common param
+        #road.vehicles.append(npc_vehicles_type(road, road.network.get_lane(("a", "b", 1)).position(10, 0), speed=31.5))
+        #1 attacker test param
+        road.vehicles.append(npc_vehicles_type(road, road.network.get_lane(("a", "b", 1)).position(90, 0), speed=31.5))
 
         #self.vehicle = ego_vehicle
 

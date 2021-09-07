@@ -38,7 +38,7 @@ def parse_args(args, parser):
                         help="train attacker or defender")
 
     parser.add_argument("--other_agent_type", type=str,
-                        default="ppo", choices=["d3qn", "ppo","vi","IDM"],
+                        default="ppo", choices=["d3qn", "ppo","vi","rvi","IDM"],
                         help='Available type is "d3qn[duel_ddqn agent]" or "ppo[onpolicy agent]" or IDM[IDM_loose agent].')
     parser.add_argument('--other_agent_policy_path', type=str,
                         default='../envs/highway/agents/policy_pool/ppo/model/actor.pt',

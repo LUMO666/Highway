@@ -371,6 +371,8 @@ class MergeRunner(Runner):
                         np.mean(np.array(render_env_infos["attacker_{}_crash".format(i)]))))
                     print("render average episode attacker_{}_distance is: ".format(i) + str(
                         np.mean(np.array(render_env_infos["attacker_{}_distance".format(i)]))))
+                    print("render average episode attacker_{}_advrew is: ".format(i) + str(
+                        np.mean(np.array(render_env_infos["adv_rewards"]))))
 
         if self.all_args.save_gifs:
             imageio.mimsave(str(self.run_dir) + '/full.gif', all_frames_all_episodes, duration=self.all_args.ifi)
