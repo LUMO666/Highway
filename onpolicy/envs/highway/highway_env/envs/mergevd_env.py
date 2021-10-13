@@ -26,7 +26,7 @@ class MergevdEnv(AbstractEnv):
     HIGH_SPEED_REWARD: float = 0.2
     MERGING_SPEED_REWARD: float = -0.5
     LANE_CHANGE_REWARD: float = 0
-    
+
     def default_config(self) -> dict:
         config = super().default_config()
         config.update({
@@ -50,7 +50,6 @@ class MergevdEnv(AbstractEnv):
         return config
 
     def _reset(self) -> None:
-        random.seed(self.config["seed"])
         self.use_bubble = False
         self.max_bubble_length = self.config["bubble_length"] 
         self._create_road()
@@ -241,6 +240,86 @@ class MergevdEnv(AbstractEnv):
             pass
 
         self.define_spaces()
+        
+        '''for i,v in enumerate(self.controlled_vehicles):
+            if i>0 and i<self.config["n_attackers"]+1:
+                v.SPEED_MAX=40'''
+
+
+    """def acquire_attacker(self,reset=False):
+        '''if reset:
+            for i,v in enumerate(self.controlled_vehicles):
+                if i < self.config["n_defenders"]:
+                    continue
+                else:
+                    self.road.vehicles.remove(v)'''
+
+        #### only one defender
+        defender_pos=self.controlled_vehicles[0].position
+        dis=[]
+        # caculate distance to defender
+        for i , v in enumerate(self.road.vehicles):
+            if i < self.config["n_defenders"]:
+                continue
+            else:
+                if v.lane_index[0]=='j' or v.lane_index[0]=='k' :
+                    dis.append(10000)
+                else:
+                    dis.append(np.linalg.norm(v.position - defender_pos))
+        # sort and take vehicles most close to defender as npc in bubble
+        from copy import deepcopy
+        dis_sort=deepcopy(dis)
+        dis_sort.sort()
+        ins=[]
+        ins_npc=[]
+        npc_bubble=self.config["available_npc_bubble"]
+        self.npcs_in_bubble=[]
+
+        dis_in_bubble=deepcopy(dis_sort[:self.config["n_attackers"] + npc_bubble])
+        #attacker_dis=random.sample(dis_in_bubble,self.config["n_attackers"])
+        attacker_dis = dis_in_bubble[:self.config["n_attackers"]]
+        npc_dis=[x for x in dis_in_bubble if x not in attacker_dis]
+
+        # ins for attackers, ins_npc for npc in bubble
+        for i in range(self.config["n_attackers"]):
+            ins.append(dis.index(attacker_dis[i]))
+
+        for i in range(npc_bubble):
+            ins_npc.append(dis.index(npc_dis[i]))
+
+        ##we must first define the attacker
+        for i,index in enumerate(ins):
+            if reset:
+                self.road.vehicles[self.config["n_defenders"] + index].use_action_level_behavior = True
+                self.controlled_vehicles[i+self.config["n_defenders"]]=self.road.vehicles[self.config["n_defenders"] + index]
+            else:
+                self.controlled_vehicles[i + self.config["n_defenders"]].use_action_level_behavior=False
+                self.road.vehicles[self.config["n_defenders"] + index].use_action_level_behavior = True
+                self.controlled_vehicles[i+self.config["n_defenders"]]=self.road.vehicles[self.config["n_defenders"]+index]
+            #for render, exchange the index in the list
+            self.road.vehicles[self.config["n_defenders"] + index],self.road.vehicles[self.config["n_defenders"] + i]=\
+            self.road.vehicles[self.config["n_defenders"] + i],self.road.vehicles[self.config["n_defenders"] + index]
+
+        for i,index in enumerate(ins_npc):
+            if reset:
+                self.road.vehicles[self.config["n_defenders"] + index].use_action_level_behavior = True
+                self.controlled_vehicles[i + self.config["n_defenders"]+self.config["n_attackers"]] = self.road.vehicles[
+                    self.config["n_defenders"] + index]
+            else:
+                self.controlled_vehicles[i + self.config["n_defenders"] + self.config["n_attackers"]].use_action_level_behavior=False
+                self.road.vehicles[self.config["n_defenders"] + index].use_action_level_behavior = True
+                self.controlled_vehicles[i + self.config["n_defenders"] + self.config["n_attackers"]] = self.road.vehicles[
+                    self.config["n_defenders"] + index]
+
+            self.npcs_in_bubble.append(self.road.vehicles[self.config["n_defenders"] + index])
+
+            self.road.vehicles[self.config["n_defenders"] + index], self.road.vehicles[self.config["n_defenders"]+self.config["n_attackers"] + i] = \
+            self.road.vehicles[self.config["n_defenders"]+self.config["n_attackers"] + i], self.road.vehicles[self.config["n_defenders"] + index]
+        # should add reset distance
+        if reset:
+            pass
+
+        self.define_spaces()"""
 
     def _reward(self, action: Action):
         """

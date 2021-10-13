@@ -207,6 +207,15 @@ class HighwayEnv(gym.core.Wrapper):
                                    config=agent_config,
                                    vehicle_id=agent_id)
                 self.other_agents.append(dummy)
+        elif self.other_agent_type == "rvi":
+            from .agents.dynamic_programming.robust_value_iteration import RobustValueIterationAgent as DummyAgent
+            agent_config = {"env_preprocessors": [{"method": "simplify"}], "budget": 50}
+            self.other_agents = []
+            for agent_id in range(self.n_other_agents):
+                dummy = DummyAgent(env=self.env_init,
+                                   config=agent_config,
+                                   vehicle_id=agent_id)
+                self.other_agents.append(dummy)
         elif self.other_agent_type == "IDM":
             print("load IDM")
             from .agents.dynamic_programming.IDM import IDMAgent as DummyAgent
@@ -274,6 +283,14 @@ class HighwayEnv(gym.core.Wrapper):
                         action = np.concatenate([action, other_actions])
                     else:
                         action = np.concatenate([other_actions, action])
+                elif self.other_agent_type == "rvi":
+                    other_actions = []
+                    for other_id in range(self.n_other_agents):
+                        other_actions.append([self.other_agents[other_id].act(self.other_obs[other_id])])
+                    if self.train_start_idx == 0:
+                        action = np.concatenate([action, other_actions])
+                    else:
+                        action = np.concatenate([other_actions, action])
                 elif self.other_agent_type == "IDM":
                     other_actions = []
                     for other_id in range(self.n_other_agents):
@@ -290,7 +307,6 @@ class HighwayEnv(gym.core.Wrapper):
                         action = np.concatenate([action, other_actions])
                     else:
                         action = np.concatenate([other_actions, action])
-
                 else:
                     if self.use_same_other_policy:
                         other_actions, self.rnn_states \
@@ -455,9 +471,11 @@ class HighwayEnv(gym.core.Wrapper):
                         infos.update({"attacker_{}_dis_reward".format(i+self.n_defenders): rew}) 
                         if not crashes[i+self.n_defenders]:
                             rewards[i][0]+=rew
+                            #pass
             else:
                 adv_rew = 0
             self.attack_succeed=False
+            self.ACC=1
             if self.controlled_vehicles[0].crashed and np.abs(self.controlled_vehicles[0].heading)>3.14/36:
                 self.attack_succeed=True
                 for i,v in enumerate(self.controlled_vehicles):
@@ -465,14 +483,26 @@ class HighwayEnv(gym.core.Wrapper):
                         continue
                     elif v.crashed and v._is_colliding(self.controlled_vehicles[0]):
                         #print(v.action['acceleration'])
-                        if len(self.controlled_vehicles_trajectory)>2 :
+                        '''if len(self.controlled_vehicles_trajectory)>2 :
                             #self.attack_succeed=(self.attack_succeed and np.abs(v.heading)<3.14/36 and np.abs(v.action['acceleration'])<0.5 and np.abs(self.controlled_vehicles_trajectory[-1][i].action['acceleration'])<0.5 and np.abs(self.controlled_vehicles_trajectory[-2][i].action['acceleration'])<0.5 and np.abs(self.controlled_vehicles_trajectory[-1][i].heading)<3.14/36)
                             self.attack_succeed=(self.attack_succeed and (v.lane_index[2]\
                             ==self.controlled_vehicles_trajectory[-1][i].lane_index[2])\
                             and (v.lane_index[2]!=self.controlled_vehicles_trajectory[-1][0].lane_index[2])\
                             and np.abs(v.heading)<3.14/36\
                             and np.abs(v.action['acceleration'])<1\
-                            and np.abs(self.controlled_vehicles_trajectory[-1][i].action['acceleration'])<1)
+                            and np.abs(self.controlled_vehicles_trajectory[-1][i].action['acceleration'])<1)'''
+                        if len(self.controlled_vehicles_trajectory)>=1 :
+                            changing_lane_crashed=self.highway_is_same_lane(v.lane_index,self.controlled_vehicles_trajectory[-1][i].lane_index)\
+                            and (not self.highway_is_same_lane(v.lane_index,self.controlled_vehicles_trajectory[-1][0].lane_index))\
+                            and np.abs(v.heading)<3.14/36\
+                            and np.abs(self.controlled_vehicles_trajectory[-1][i].action['acceleration'])<self.ACC
+                            #and np.abs(v.action['acceleration'])<self.ACC\
+                            front_vehicle, rear_vehicle = self.controlled_vehicles[0].road.neighbour_vehicles(self.controlled_vehicles[0])
+                            rear_end=(v==front_vehicle and np.abs(v.action['acceleration'])<self.ACC\
+                            and self.highway_is_same_lane(v.lane_index,self.controlled_vehicles_trajectory[-1][0].lane_index)\
+                            and np.abs(v.heading)<3.14/36)
+                            #self.attack_succeed=self.attack_succeed and (changing_lane_crashed or rear_end)
+                            self.attack_succeed=self.attack_succeed and changing_lane_crashed
                         else:
                             self.attack_succeed= False
                 if self.attack_succeed:
@@ -517,6 +547,12 @@ class HighwayEnv(gym.core.Wrapper):
             infos = {}
 
         return obs, rewards, dones, infos#, available_actions
+
+    def highway_is_same_lane(self,lane1,lane2):
+        if lane1[2]==lane2[2]:
+            return True
+        else:
+            return False
 
     def reset(self, choose = True):
         if choose:

@@ -507,8 +507,8 @@ class RoundaboutvdEnv(gym.core.Wrapper):
                             rear_end=(v==front_vehicle and np.abs(v.action['acceleration'])<1\
                             and self.roundabout_is_same_lane(v.lane_index,self.controlled_vehicles_trajectory[-1][0].lane_index)\
                             and -0.05>v.action['steering']>-0.3)
-                            self.attack_succeed=self.attack_succeed and (changing_lane_crashed or rear_end)
-                            #self.attack_succeed=self.attack_succeed and changing_lane_crashed
+                            #self.attack_succeed=self.attack_succeed and (changing_lane_crashed or rear_end)
+                            self.attack_succeed=self.attack_succeed and changing_lane_crashed
                             #print(changing_lane_crashed,rear_end)
                         else:
                             self.attack_succeed= False

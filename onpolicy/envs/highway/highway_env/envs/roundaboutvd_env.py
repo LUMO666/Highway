@@ -53,7 +53,6 @@ class RoundaboutvdEnv(AbstractEnv):
         return config
 
     def _reset(self) -> None:
-        random.seed(self.config["seed"])
         self.use_bubble = False
         self.max_bubble_length = self.config["bubble_length"] 
         self._create_road()
