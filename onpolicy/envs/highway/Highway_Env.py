@@ -495,8 +495,8 @@ class HighwayEnv(gym.core.Wrapper):
                             changing_lane_crashed=self.highway_is_same_lane(v.lane_index,self.controlled_vehicles_trajectory[-1][i].lane_index)\
                             and (not self.highway_is_same_lane(v.lane_index,self.controlled_vehicles_trajectory[-1][0].lane_index))\
                             and np.abs(v.heading)<3.14/36\
+                            and np.abs(v.action['acceleration'])<self.ACC\
                             and np.abs(self.controlled_vehicles_trajectory[-1][i].action['acceleration'])<self.ACC
-                            #and np.abs(v.action['acceleration'])<self.ACC\
                             front_vehicle, rear_vehicle = self.controlled_vehicles[0].road.neighbour_vehicles(self.controlled_vehicles[0])
                             rear_end=(v==front_vehicle and np.abs(v.action['acceleration'])<self.ACC\
                             and self.highway_is_same_lane(v.lane_index,self.controlled_vehicles_trajectory[-1][0].lane_index)\

@@ -508,14 +508,14 @@ class MergevdEnv(gym.core.Wrapper):
                             changing_lane_crashed=self.merge_is_same_lane(v.lane_index,self.controlled_vehicles_trajectory[-1][i].lane_index)\
                             and (not self.merge_is_same_lane(v.lane_index,self.controlled_vehicles_trajectory[-1][0].lane_index))\
                             and np.abs(v.heading)<3.14/36\
-                            and np.abs(v.action['acceleration'])<self.ACC\
                             and np.abs(self.controlled_vehicles_trajectory[-1][i].action['acceleration'])<self.ACC
+                            #and np.abs(v.action['acceleration'])<self.ACC\
                             front_vehicle, rear_vehicle = self.controlled_vehicles[0].road.neighbour_vehicles(self.controlled_vehicles[0])
                             rear_end=(v==front_vehicle and v.action['acceleration']>-2 and self.controlled_vehicles_trajectory[-1][i].action['acceleration']>-2\
                             and self.merge_is_same_lane(v.lane_index,self.controlled_vehicles_trajectory[-1][0].lane_index)\
                             and np.abs(v.heading)<3.14/36)
-                            self.attack_succeed=self.attack_succeed and (changing_lane_crashed or rear_end)
-                            #self.attack_succeed=self.attack_succeed and changing_lane_crashed
+                            #self.attack_succeed=self.attack_succeed and (changing_lane_crashed or rear_end)
+                            self.attack_succeed=self.attack_succeed and changing_lane_crashed
                         else:
                             self.attack_succeed= False
                 if self.attack_succeed:
@@ -526,10 +526,10 @@ class MergevdEnv(gym.core.Wrapper):
 
             self.v_crash=[v.crashed for v in self.road.vehicles]
             self.v_acc=[v.action['acceleration'] for v in self.road.vehicles]
-            print("/")
-            print(self.attack_succeed)
-            print(self.v_crash)
-            print(self.v_acc)
+            #print("/")
+            #print(self.attack_succeed)
+            #print(self.v_crash)
+            #print(self.v_acc)
             #print('action:',action)
             #print(self.controlled_vehicles[1].action['acceleration'])
             #print(self.controlled_vehicles[2].action['acceleration'])

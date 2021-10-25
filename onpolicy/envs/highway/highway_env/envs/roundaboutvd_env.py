@@ -138,6 +138,7 @@ class RoundaboutvdEnv(AbstractEnv):
         self.controlled_vehicles = [defender vehicle, merge_vehicle, other attackers]
 
         """
+        #position_deviation = 40
         position_deviation = 20
         speed_deviation = 2
 
@@ -164,7 +165,7 @@ class RoundaboutvdEnv(AbstractEnv):
         destinations = ["exr", "sxr", "nxr"]
         npc_vehicles_type = utils.class_from_path(self.config["npc_vehicles_type"])
 
-        for i in range(self.config['n_attackers']):
+        """for i in range(self.config['n_attackers']):
             '''vehicle = self.action_type.vehicle_class(road,
                                                        road.network.get_lane(("ne", "wx", i)).position(
                                                        20*(i+1) + 2*(random.random()-0.5)*position_deviation,0),
@@ -186,7 +187,38 @@ class RoundaboutvdEnv(AbstractEnv):
                                                        heading=attacker_lane.heading_at(local_position))
             vehicle.use_action_level_behavior = True
             self.controlled_vehicles.append(vehicle)
-            road.vehicles.append(vehicle)
+            road.vehicles.append(vehicle)"""
+
+        # create a attacker behind the VI or RVI defender
+        attacker_lane=road.network.get_lane(("ser", "ses", 0))
+        local_position=2*(random.random()-0.5)*position_deviation+105
+        Position=attacker_lane.position(105,0)                                           
+        vehicle = self.action_type.vehicle_class(road,
+                                                    Position,
+                                                    speed=16 + 2*(random.random()-0.5) * speed_deviation,
+                                                    heading=attacker_lane.heading_at(local_position))
+        vehicle.use_action_level_behavior = True
+        self.controlled_vehicles.append(vehicle)
+        road.vehicles.append(vehicle)
+
+        i=self.config['n_attackers']-1 #vi,rvi
+        #i=self.config['n_attackers']  #for d3qn or ppo defender, all attacker are in the circle lane
+        while i>0:
+            attacker_lane=road.network.get_lane(("sx","se",random.randint(0,1)))
+            local_position=2*(random.random()-0.5)*position_deviation
+            Position=attacker_lane.position(local_position,0)                                           
+            vehicle = self.action_type.vehicle_class(road,
+                                                       Position,
+                                                       speed=16 + 2*(random.random()-0.5) * speed_deviation,
+                                                       heading=attacker_lane.heading_at(local_position))
+            colliding_with_other_vehicles=False
+            for v in road.vehicles:
+                colliding_with_other_vehicles=colliding_with_other_vehicles or vehicle._is_colliding(v)
+            if colliding_with_other_vehicles==False:
+                i=i-1
+                vehicle.use_action_level_behavior = True
+                self.controlled_vehicles.append(vehicle)
+                road.vehicles.append(vehicle)
         
         for i in list(range(-1, 0)):
             vehicle = npc_vehicles_type.make_on_lane(self.road,

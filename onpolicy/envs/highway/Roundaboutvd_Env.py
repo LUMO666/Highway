@@ -518,10 +518,10 @@ class RoundaboutvdEnv(gym.core.Wrapper):
                 self.c_v=deepcopy(self.controlled_vehicles)
                 self.controlled_vehicles_trajectory.append(self.c_v)
             #print('action:',action)
-            '''print('speed:',self.controlled_vehicles[0].speed)
-            print('lane:',self.controlled_vehicles[0].target_lane_index)
-            print('steering:',self.controlled_vehicles[0].action['steering'])
-            print('acceleration:',self.controlled_vehicles[0].action['acceleration'])'''
+            #print('speed:',self.controlled_vehicles[0].speed)
+            #print('lane:',self.controlled_vehicles[0].target_lane_index)
+            #print('steering:',self.controlled_vehicles[0].action['steering'])
+            #print('acceleration:',self.controlled_vehicles[0].action['acceleration'])
 
             ####adv_rew
             if adv_rew>0:
@@ -559,7 +559,8 @@ class RoundaboutvdEnv(gym.core.Wrapper):
 
     def roundabout_is_same_lane(self,lane1,lane2):
         lanelist=["se","ex","ee","nx","ne","wx","we","sx"]
-        if (lane1[0] in lanelist) and (lane1[1] in lanelist) and (lane2[0] in lanelist) and (lane2[1] in lanelist) and (lane1[2]==lane2[2]):
+        #if (lane1[0] in lanelist) and (lane1[1] in lanelist) and (lane2[0] in lanelist) and (lane2[1] in lanelist) and (lane1[2]==lane2[2]):
+        if lane1[2]==lane2[2]:
             return True
         else:
             return False

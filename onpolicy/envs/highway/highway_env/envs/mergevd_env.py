@@ -163,7 +163,7 @@ class MergevdEnv(AbstractEnv):
             if i < self.config["n_defenders"]+1:
                 continue
             else:
-                if (v.position - defender_pos)[0] <0:
+                if (v.position - defender_pos)[0] <-100000:
                     dis.append(10000)
                 else:
                     dis.append(np.linalg.norm(v.position - defender_pos))

@@ -3,7 +3,7 @@ env="Highway"
 scenario="highway-v0"
 task="attack"
 n_defenders=1
-n_attackers=3
+n_attackers=2
 
 n_dummies=0
 algo="rmappo"
