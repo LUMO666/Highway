@@ -8,7 +8,22 @@ import imageio
 from onpolicy.utils.util import update_linear_schedule
 from onpolicy.runner.shared.base_runner import Runner
 from pathlib import Path
+from torch.nn.functional import log_softmax
 import copy
+
+def concat_state_latent(s, z_, n):
+    s_concat = np.copy(s)
+    z_one_hot = np.zeros(n)
+    z_one_hot[z_] = 1
+    #print("s_shape:",s.shape)
+    z_one_hot_expand = np.expand_dims(np.expand_dims(z_one_hot,0),0)
+    z_one_hot_stack = np.tile(z_one_hot_expand,(s.shape[0],s.shape[1],1))
+    return np.concatenate((s_concat,z_one_hot_stack),axis=-1)
+
+    #for i in range(s.shape[1]-1):
+    #    z_one_hot_stack = np.vstack((z_one_hot_stack,z_one_hot))
+    #z_one_hot_stack = np.expand_dims(z_one_hot_stack,0)
+    #return np.concatenate([s, z_one_hot_stack],2)
 
 def _t2n(x):
     return x.detach().cpu().numpy()
@@ -33,7 +48,14 @@ class HighwayRunner(Runner):
         start = time.time()
         episodes = int(self.num_env_steps) // self.episode_length // self.n_rollout_threads
 
+        #diayn parameters
+        p_z = np.full(self.n_skills, 1 / self.n_skills)
+        p_z_tensor = torch.tensor(p_z,dtype=torch.float32).cuda()
+        #p_z_reward = np.tile(p_z,self.batch_size)
+        last_logq_zs = 0
+
         for episode in range(episodes):
+            z = np.random.choice(self.n_skills, p=p_z)
             if self.use_linear_lr_decay:
                 self.trainer.policy.lr_decay(episode, episodes)
 
@@ -65,12 +87,31 @@ class HighwayRunner(Runner):
                 values, actions, action_log_probs, rnn_states, rnn_states_critic = self.collect(step)
                 # Obser reward and next obs
                 obs, rewards, dones, infos = self.envs.step(actions)
+                # diayn obs
+                discriminator_obs = np.copy(obs).reshape(obs.shape[0],-1)
+                obs = concat_state_latent(obs,z,self.n_skills)
                 for n,info in enumerate(infos):
                     if info["bubble_stop"]:
                         new_done=[]
                         for _ in dones[n]:
                             new_done.append(True)
                         dones[n]=new_done
+                #diayn rewards
+                #print("rewards:",rewards)
+                #print("shape:",rewards.shape)
+                #
+                #print("dis_obs:",discriminator_obs.reshape(1,-1).shape)
+                logits = self.discriminator_calculate(torch.from_numpy(discriminator_obs).detach().cuda())
+                #logq_z_ns = log_softmax(logits, dim=-1)
+                logq_z_ns = log_softmax(logits)
+                for r_agent in rewards[0]:                    
+                    #r_agent[0] = logq_z_ns.gather(-1, zs).detach() - torch.log(p_z + 1e-6)
+                    #print(logq_z_ns.detach())
+                    #print(torch.log(p_z_tensor + 1e-6))
+                    r_skills = logq_z_ns.detach() - torch.log(p_z_tensor + 1e-6)
+                    #print(r_skills)
+                    r_agent[0] = r_skills[0][z]
+                #print("dis_rewards:",rewards)
 
                 if self.use_render:
                     self.envs.render(mode = 'human')
@@ -118,13 +159,16 @@ class HighwayRunner(Runner):
     def warmup(self):
         # reset env
         obs = self.envs.reset()
+        #diayn obs
+        obs = concat_state_latent(obs,np.random.choice(self.n_skills),self.n_skills)
+        #print(obs.shape)
         # replay buffer
         if self.use_centralized_V:
             share_obs = obs.reshape(self.n_rollout_threads, -1)
             share_obs = np.expand_dims(share_obs, 1).repeat(self.num_agents, axis=1)
         else:
             share_obs = obs
-
+        #print(share_obs.shape)
         self.buffer.share_obs[0] = share_obs.copy()
         self.buffer.obs[0] = obs.copy()
 

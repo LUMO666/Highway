@@ -16,6 +16,7 @@ import pdb
 
 
 class RoundaboutvdEnv(AbstractEnv):
+    
 
     """
     A highway merge negotiation environment.
@@ -29,7 +30,7 @@ class RoundaboutvdEnv(AbstractEnv):
     RIGHT_LANE_REWARD: float = 0
     HIGH_SPEED_REWARD: float = 0.2
     LANE_CHANGE_REWARD: float = 0
-    
+
     def default_config(cls) -> dict:
         config = super().default_config()
         config.update({
@@ -53,7 +54,6 @@ class RoundaboutvdEnv(AbstractEnv):
         return config
 
     def _reset(self) -> None:
-        random.seed(self.config["seed"])
         self.use_bubble = False
         self.max_bubble_length = self.config["bubble_length"] 
         self._create_road()

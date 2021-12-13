@@ -104,12 +104,12 @@ class RoundaboutvdEnv(gym.core.Wrapper):
             "reward_speed_range": [20, self.reward_highest_speed],
             "available_npc_bubble":self.available_npc_bubble,
             "bubble_length":self.bubble_length,
-            "seed":all_args.seed
         }
         
         self.env_init = load_environment(self.env_dict)
         
         super().__init__(self.env_init)
+        #self.env.set_random()
         #print(self.observation_space)
         # get new obs and action space
         self.all_observation_space = []
@@ -507,8 +507,8 @@ class RoundaboutvdEnv(gym.core.Wrapper):
                             rear_end=(v==front_vehicle and np.abs(v.action['acceleration'])<1\
                             and self.roundabout_is_same_lane(v.lane_index,self.controlled_vehicles_trajectory[-1][0].lane_index)\
                             and -0.05>v.action['steering']>-0.3)
-                            self.attack_succeed=self.attack_succeed and (changing_lane_crashed or rear_end)
-                            #self.attack_succeed=self.attack_succeed and changing_lane_crashed
+                            #self.attack_succeed=self.attack_succeed and (changing_lane_crashed or rear_end)
+                            self.attack_succeed=self.attack_succeed and changing_lane_crashed
                             #print(changing_lane_crashed,rear_end)
                         else:
                             self.attack_succeed= False

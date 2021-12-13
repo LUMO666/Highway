@@ -87,7 +87,7 @@ class MergeRunner(Runner):
 
             # save model
             if (episode % self.save_interval == 0 or episode == episodes - 1):
-                self.save()
+                self.save(episode)
 
             # log information
             if episode % self.log_interval == 0:

@@ -74,7 +74,6 @@ def load_environment(env_config):
     if env_config.get("import_module", None):
         __import__(env_config["import_module"])
     try:
-
         env = gym.make(env_config['id'])
         # Save env module in order to be able to import it again
         env.import_module = env_config.get("import_module", None)
@@ -90,6 +89,7 @@ def load_environment(env_config):
     # Configure the environment, if supported
     try:
         env.unwrapped.configure(env_config)
+        #env.
         env.reset()
 
     except AttributeError as e:

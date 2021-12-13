@@ -336,4 +336,9 @@ def get_config():
     # pretrained parameters
     parser.add_argument("--model_dir", type=str, default=None, help="by default None. set the path to pretrained model.")
 
+    # diayn parameters
+    parser.add_argument("--use_diayn", action='store_true', default=False, help="by default None. Use diayn training.")
+    parser.add_argument("--diayn_skills", type=int, default=20, help="by default None. Use diayn training.")
+    parser.add_argument("--discriminator_n_hidden_filiters", type=int, default=300, help="by default None. Use diayn training.")
+
     return parser

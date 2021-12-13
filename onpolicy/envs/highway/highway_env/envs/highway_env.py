@@ -284,7 +284,7 @@ class HighwayEnv(AbstractEnv):
         lateral=np.abs(dis[1])
         lp=4
         x=np.power(np.power(longitudinal,lp)+np.power(2.5*lateral,lp),1/lp)-10
-        reward=(self.sigmoid(x)*(1-self.sigmoid(x))*4.-0.5)*0.3
+        reward=(self.sigmoid(x)*(1-self.sigmoid(x))*4.-0.5)*0.06
         return reward
 
     def dis_rew(self) :#-> bool:

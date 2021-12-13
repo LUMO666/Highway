@@ -51,6 +51,10 @@ class Runner(object):
         # dir
         self.model_dir = self.all_args.model_dir
 
+        #Diayn
+        self.use_diayn = self.all_args.use_diayn
+        self.n_skills = self.all_args.diayn_skills
+
         if self.use_wandb:
             self.save_dir = str(wandb.run.dir)
             self.run_dir = str(wandb.run.dir)
@@ -65,7 +69,12 @@ class Runner(object):
                 os.makedirs(self.save_dir)
 
         if "mappo" in self.algorithm_name:
-            if self.use_single_network:
+            #diayn
+            if self.use_diayn:
+                from onpolicy.algorithms.diayn.r_mappo import R_MAPPO as TrainAlgo
+                from onpolicy.algorithms.diayn.algorithm.rMAPPOPolicy import R_MAPPOPolicy as Policy
+
+            elif self.use_single_network:
                 from onpolicy.algorithms.r_mappo_single.r_mappo_single import R_MAPPO as TrainAlgo
                 from onpolicy.algorithms.r_mappo_single.algorithm.rMAPPOPolicy import R_MAPPOPolicy as Policy
             else:
@@ -83,22 +92,55 @@ class Runner(object):
         
         share_observation_space = self.envs.share_observation_space[0] if self.use_centralized_V else self.envs.observation_space[0]
 
-        # policy network
-        self.policy = Policy(self.all_args,
+        #diayn
+        if self.use_diayn:
+            self.policy = Policy(self.all_args,
+                            n_skills=self.n_skills,
+                            obs_space=self.envs.observation_space[0],
+                            share_obs_space=share_observation_space,
+                            act_space=self.envs.action_space[0],
+                            device = self.device,
+                            cat_self = False)
+            #print("os:",self.policy.obs_space)
+            #print("ss:",self.policy.share_obs_space)
+        
+        else:
+            # policy network
+            self.policy = Policy(self.all_args,
                             self.envs.observation_space[0],
                             share_observation_space,
                             self.envs.action_space[0],
                             device = self.device,
                             cat_self = False)
 
+
         if self.model_dir is not None:
             self.restore()
 
         # algorithm
-        self.trainer = TrainAlgo(self.all_args, self.policy, device = self.device)
+        #diayn
+        if self.use_diayn:
+            self.trainer = TrainAlgo(self.all_args, self.n_skills, self.policy, device = self.device)
+        else:
+            self.trainer = TrainAlgo(self.all_args, self.policy, device = self.device)
         
         # buffer
-        self.buffer = SharedReplayBuffer(self.all_args,
+        #diayn
+        if self.use_diayn:
+            self.buffer = SharedReplayBuffer(self.all_args,
+                                        self.num_agents,
+                                        self.envs.observation_space[0],
+                                        share_observation_space,
+                                        self.envs.action_space[0])
+        elif self.use_rspo:
+            from onpolicy.algorithms.rspo.RSPOBuffer import RSPOBuffer
+            self.buffer = RSPOBuffer(self.all_args,
+                                        self.num_agents,
+                                        self.envs.observation_space[0],
+                                        share_observation_space,
+                                        self.envs.action_space[0])
+        else:
+            self.buffer = SharedReplayBuffer(self.all_args,
                                         self.num_agents,
                                         self.envs.observation_space[0],
                                         share_observation_space,
@@ -124,7 +166,11 @@ class Runner(object):
                                                 np.concatenate(self.buffer.masks[-1]))
         next_values = np.array(np.split(_t2n(next_values), self.n_rollout_threads))
         self.buffer.compute_returns(next_values, self.trainer.value_normalizer)
-    
+    #diayn discriminator reward calculation
+    def discriminator_calculate(self,state):
+        return self.policy.discriminator_calculate(state)
+
+
     def train(self):
         self.trainer.prep_training()
         train_infos = self.trainer.train(self.buffer)      
