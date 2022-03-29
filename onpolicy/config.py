@@ -340,5 +340,6 @@ def get_config():
     parser.add_argument("--use_diayn", action='store_true', default=False, help="by default None. Use diayn training.")
     parser.add_argument("--diayn_skills", type=int, default=20, help="by default None. Use diayn training.")
     parser.add_argument("--discriminator_n_hidden_filiters", type=int, default=300, help="by default None. Use diayn training.")
-
+    # rspo parameters
+    parser.add_argument('--use_rspo',action='store_true',default=False, help="wether use rspo")
     return parser

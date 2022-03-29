@@ -87,6 +87,7 @@ class HighwayRunner(Runner):
                 values, actions, action_log_probs, rnn_states, rnn_states_critic = self.collect(step)
                 # Obser reward and next obs
                 obs, rewards, dones, infos = self.envs.step(actions)
+                origin_rewards = copy.deepcopy(rewards)
                 # diayn obs
                 discriminator_obs = np.copy(obs).reshape(obs.shape[0],-1)
                 obs = concat_state_latent(obs,z,self.n_skills)
@@ -111,10 +112,16 @@ class HighwayRunner(Runner):
                     r_skills = logq_z_ns.detach() - torch.log(p_z_tensor + 1e-6)
                     #print(r_skills)
                     r_agent[0] = r_skills[0][z]
+                    #print("r_agent:",r_agent[0])
+                    #print("r_skill:",r_skills[0][z])
+                    #print("reward0:",rewards[0])
                 #print("dis_rewards:",rewards)
 
                 if self.use_render:
                     self.envs.render(mode = 'human')
+                #print("whether equal",rewards==origin_rewards)
+                #print("diayn_reward:",rewards)
+                #print("env_reward:",origin_rewards)
                 data = obs, rewards, dones, infos, values, actions, action_log_probs, rnn_states, rnn_states_critic
                 # insert data into buffer
                 self.insert(data)
@@ -317,6 +324,10 @@ class HighwayRunner(Runner):
     @torch.no_grad()
     def render(self):
         envs = self.render_envs
+        p_z = np.full(self.n_skills, 1 / self.n_skills)
+        p_z_tensor = torch.tensor(p_z,dtype=torch.float32).cuda()
+        #p_z_reward = np.tile(p_z,self.batch_size)
+        last_logq_zs = 0
 
         render_env_infos = {"episode_rewards": [],
                             "episode_dummy_rewards": [],
@@ -339,9 +350,12 @@ class HighwayRunner(Runner):
         all_frames_all_episodes = []
         # episode
         for episode in range(self.all_args.render_episodes):
+            z = np.random.choice(self.n_skills, p=p_z)
+            print("Current policy id is ",z)
             all_frames = []
             render_choose = np.ones(self.n_render_rollout_threads) == 1.0
             obs = envs.reset(render_choose)
+            obs = concat_state_latent(obs,z,self.n_skills)
 
             if self.all_args.save_gifs:
 
@@ -371,6 +385,7 @@ class HighwayRunner(Runner):
 
 
                 obs, rewards, dones, infos = envs.step(actions)
+                obs = concat_state_latent(obs,z,self.n_skills)
 
                 if self.all_args.save_gifs:
                     image = envs.render('rgb_array')[0]

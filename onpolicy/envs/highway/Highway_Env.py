@@ -207,6 +207,15 @@ class HighwayEnv(gym.core.Wrapper):
                                    config=agent_config,
                                    vehicle_id=agent_id)
                 self.other_agents.append(dummy)
+        elif self.other_agent_type == "rvi":
+            from .agents.dynamic_programming.robust_value_iteration import RobustValueIterationAgent as DummyAgent
+            agent_config = {"env_preprocessors": [{"method": "simplify"}], "budget": 50}
+            self.other_agents = []
+            for agent_id in range(self.n_other_agents):
+                dummy = DummyAgent(env=self.env_init,
+                                   config=agent_config,
+                                   vehicle_id=agent_id)
+                self.other_agents.append(dummy)
         elif self.other_agent_type == "IDM":
             print("load IDM")
             from .agents.dynamic_programming.IDM import IDMAgent as DummyAgent
@@ -241,7 +250,7 @@ class HighwayEnv(gym.core.Wrapper):
                                     self.all_action_space[self.load_start_idx],
                                     hidden_size = agent_config['hidden_size'], # re-structure this!
                                     use_recurrent_policy = self.all_args.use_recurrent_policy) # cpu is fine actually, keep it for now.
-                print(f"path = {self.other_agent_policy_path}")
+                #print(f"path = {self.other_agent_policy_path}")
                 policy_state_dict = torch.load(self.other_agent_policy_path, map_location='cpu')
                 self.other_agents.load_state_dict(policy_state_dict)
                 self.other_agents.eval()
@@ -274,6 +283,14 @@ class HighwayEnv(gym.core.Wrapper):
                         action = np.concatenate([action, other_actions])
                     else:
                         action = np.concatenate([other_actions, action])
+                elif self.other_agent_type == "rvi":
+                    other_actions = []
+                    for other_id in range(self.n_other_agents):
+                        other_actions.append([self.other_agents[other_id].act(self.other_obs[other_id])])
+                    if self.train_start_idx == 0:
+                        action = np.concatenate([action, other_actions])
+                    else:
+                        action = np.concatenate([other_actions, action])
                 elif self.other_agent_type == "IDM":
                     other_actions = []
                     for other_id in range(self.n_other_agents):
@@ -290,7 +307,6 @@ class HighwayEnv(gym.core.Wrapper):
                         action = np.concatenate([action, other_actions])
                     else:
                         action = np.concatenate([other_actions, action])
-
                 else:
                     if self.use_same_other_policy:
                         other_actions, self.rnn_states \
@@ -455,34 +471,44 @@ class HighwayEnv(gym.core.Wrapper):
                         infos.update({"attacker_{}_dis_reward".format(i+self.n_defenders): rew}) 
                         if not crashes[i+self.n_defenders]:
                             rewards[i][0]+=rew
+                            #pass
             else:
                 adv_rew = 0
-            self.attack_succeed=False
+            '''self.attack_succeed=False
+            self.ACC=2.5
             if self.controlled_vehicles[0].crashed and np.abs(self.controlled_vehicles[0].heading)>3.14/36:
                 self.attack_succeed=True
                 for i,v in enumerate(self.controlled_vehicles):
                     if i<self.n_defenders or i>=self.n_defenders+self.n_attackers:
                         continue
                     elif v.crashed and v._is_colliding(self.controlled_vehicles[0]):
-                        #print(v.action['acceleration'])
-                        if len(self.controlled_vehicles_trajectory)>2 :
-                            #self.attack_succeed=(self.attack_succeed and np.abs(v.heading)<3.14/36 and np.abs(v.action['acceleration'])<0.5 and np.abs(self.controlled_vehicles_trajectory[-1][i].action['acceleration'])<0.5 and np.abs(self.controlled_vehicles_trajectory[-2][i].action['acceleration'])<0.5 and np.abs(self.controlled_vehicles_trajectory[-1][i].heading)<3.14/36)
-                            self.attack_succeed=(self.attack_succeed and (v.lane_index[2]\
-                            ==self.controlled_vehicles_trajectory[-1][i].lane_index[2])\
-                            and (v.lane_index[2]!=self.controlled_vehicles_trajectory[-1][0].lane_index[2])\
+                        if len(self.controlled_vehicles_trajectory)>=2 :
+                            changing_lane_crashed=self.highway_is_same_lane(v.lane_index,self.controlled_vehicles_trajectory[-1][i].lane_index)\
+                            and (not self.highway_is_same_lane(v.lane_index,self.controlled_vehicles_trajectory[-1][0].lane_index))\
                             and np.abs(v.heading)<3.14/36\
-                            and np.abs(v.action['acceleration'])<1\
-                            and np.abs(self.controlled_vehicles_trajectory[-1][i].action['acceleration'])<1)
+                            and np.abs(v.action['acceleration'])<self.ACC\
+                            and np.abs(self.controlled_vehicles_trajectory[-1][i].action['acceleration'])<self.ACC
+                            front_vehicle, rear_vehicle = self.controlled_vehicles[0].road.neighbour_vehicles(self.controlled_vehicles[0])
+                            rear_end=(v==front_vehicle and np.abs(v.action['acceleration'])<self.ACC\
+                            and self.highway_is_same_lane(v.lane_index,self.controlled_vehicles_trajectory[-1][0].lane_index)\
+                            and self.highway_is_same_lane(v.lane_index,self.controlled_vehicles_trajectory[-1][i].lane_index)\
+                            and self.highway_is_same_lane(v.lane_index,self.controlled_vehicles_trajectory[-2][i].lane_index)\
+                            and np.abs(v.heading)<3.14/36)
+                            self.attack_succeed=self.attack_succeed and (changing_lane_crashed or rear_end)
                         else:
                             self.attack_succeed= False
                 if self.attack_succeed:
-                    adv_rew=10
+                    adv_rew=100
             else:
                 self.c_v=deepcopy(self.controlled_vehicles)
-                self.controlled_vehicles_trajectory.append(self.c_v)
-            #print('action:',action)
-            #print(self.controlled_vehicles[1].action['acceleration'])
-            #print(self.controlled_vehicles[2].action['acceleration'])
+                self.controlled_vehicles_trajectory.append(self.c_v)'''
+
+            self.c_v=deepcopy(self.controlled_vehicles)
+            self.controlled_vehicles_trajectory.append(self.c_v)
+            
+            if self.controlled_vehicles[0].crashed:
+                adv_rew=self.attack_succeed()
+                
 
             ####adv_rew
             if adv_rew>0:
@@ -517,6 +543,50 @@ class HighwayEnv(gym.core.Wrapper):
             infos = {}
 
         return obs, rewards, dones, infos#, available_actions
+
+    def attack_succeed(self):
+        self.ACC=1
+        changing_lane_crashed=False
+        rear_end=False
+        frame__att=round(0.51/self.dt)+1
+        for i,v in enumerate(self.controlled_vehicles):
+            if i<self.n_defenders or i>=self.n_defenders+self.n_attackers:
+                    continue
+            elif v.crashed and v._is_colliding(self.controlled_vehicles[0]) and len(self.controlled_vehicles_trajectory)>=frame__att:
+                v_acc=[x[i].action['acceleration'] for x in self.controlled_vehicles_trajectory[-frame__att:]]
+                v_head=[x[i].heading for x in self.controlled_vehicles_trajectory[-frame__att:]]
+                v_lane=[x[i].lane_index[2] for x in self.controlled_vehicles_trajectory[-frame__att:]]
+                #changing_lane_crashed
+                changing_lane_crashed = (np.abs(self.controlled_vehicles[0].heading)>3.14/36\
+                    and max(v_lane)==min(v_lane)\
+                    and (not self.highway_is_same_lane(v.lane_index,self.controlled_vehicles_trajectory[-1][0].lane_index))\
+                    and max(np.abs(v_head))<3.14/36\
+                    and max(np.abs(v_acc))<self.ACC)\
+
+                #rear_end
+                front_vehicle, rear_vehicle = self.controlled_vehicles[0].road.neighbour_vehicles(self.controlled_vehicles[0])
+                rear_end = (v==front_vehicle\
+                and self.highway_is_same_lane(v.lane_index,self.controlled_vehicles_trajectory[-1][0].lane_index)\
+                and max(np.abs(v_head))<3.14/36\
+                and max(np.abs(v_acc))<self.ACC\
+                and max(v_lane)==min(v_lane))
+                '''print("changing_lane_crashed:",changing_lane_crashed)
+                print("rear_end:",rear_end)
+                print("v_acc:",v_acc)
+                print("v_head:",v_head)'''
+        attack_succeed = changing_lane_crashed or rear_end
+        #attack_succeed = changing_lane_crashed
+
+        if attack_succeed:
+            return 10/self.dt
+        else:
+            return 0
+
+    def highway_is_same_lane(self,lane1,lane2):
+        if lane1[2]==lane2[2]:
+            return True
+        else:
+            return False
 
     def reset(self, choose = True):
         if choose:
@@ -579,6 +649,108 @@ class HighwayEnv(gym.core.Wrapper):
         else:
             obs = np.zeros((self.n_agents, self.obs_dim))
         return obs
+
+    def reset_task(self,config_reseted):
+        self.n_attackers=config_reseted['n_attackers']
+        self.n_dummies = self.available_npc_bubble#all_args.n_dummies
+        self.other_agent_type = config_reseted['other_agent_type']
+        self.other_agent_policy_path = config_reseted['other_agent_policy_path']
+
+
+        if self.task_type == "attack":
+            self.n_agents = self.n_attackers
+            self.n_other_agents = self.n_defenders
+            self.load_start_idx = 0
+            self.train_start_idx = self.n_defenders
+        elif self.task_type == "defend":
+            self.n_agents = self.n_defenders
+            self.n_other_agents = self.n_attackers
+            self.load_start_idx = self.n_defenders
+            self.train_start_idx = 0
+        elif self.task_type == "all":
+            self.n_agents = self.n_defenders + self.n_attackers
+            self.n_other_agents = 0
+            self.load_start_idx = self.n_defenders + self.n_attackers
+            self.train_start_idx = 0
+        else:
+            raise NotImplementedError
+        self.env_dict={
+            "id": self.scenario_name,
+            "import_module": "onpolicy.envs.highway.highway_env",
+            # u must keep this order!!! can not change that!!!
+            "controlled_vehicles": self.n_defenders + self.n_attackers + self.n_dummies,
+            "n_defenders": self.n_defenders,
+            "n_attackers": self.n_attackers,
+            "n_dummies": self.n_dummies,
+            "task_type" : self.task_type,
+            "duration": self.horizon,
+            "action": {
+                "type": "MultiAgentAction",
+                "action_config": {
+                    "type": "DiscreteMetaAction"
+                }
+            },
+            "observation": {
+                "type": "MultiAgentObservation",
+                "observation_config": {
+                    "type": "Kinematics"
+                }
+            },
+            "npc_vehicles_type": self.npc_vehicles_type,
+            # npc vehicles could also set as "onpolicy.envs.highway.highway_env.vehicle.dummy.DummyVehicle" 
+            # Dummy Vehicle is the vehicle keeping lane with the speed of 25 m/s.
+            # While IDM Vehicle is the vehicle which is able to change lane and speed based on the obs of its front & rear vehicle
+            "vehicles_count": self.vehicles_count,
+            "offscreen_rendering": self.use_offscreen_render,
+            "collision_reward": self.collision_reward,
+            "simulation_frequency": self.simulation_frequency,
+            "dt": self.dt,
+            "reward_speed_range": [20, self.reward_highest_speed],
+            "available_npc_bubble":self.available_npc_bubble,
+            "bubble_length":self.bubble_length,
+            "seed":self.all_args.seed
+        }
+        
+        self.env_init = load_environment(self.env_dict)
+
+        super().__init__(self.env_init)
+        
+        # get new obs and action space
+        self.all_observation_space = []
+        self.all_action_space = []
+        for agent_id in range(self.n_attackers + self.n_defenders + self.n_dummies):
+            obs_shape = list(self.observation_space[agent_id].shape)
+            self.obs_dim = reduce(lambda x, y: x*y, obs_shape)
+            self.all_observation_space.append(gym.spaces.Box(low=-1e10, high=1e10, shape=(self.obs_dim,)))
+            self.all_action_space.append(self.action_space[agent_id])
+        
+        # here we load other agents and dummies, can not change the order of the following code!!
+
+        if self.n_other_agents > 0:
+            self.load_other_agents()
+
+
+        if self.n_dummies > 0:
+            self.load_dummies()
+        
+        # get new obs and action space
+        self.new_observation_space = [] # just for store
+        self.new_action_space = [] # just for store
+        self.share_observation_space = []
+        for agent_id in range(self.n_agents):
+            obs_shape = list(self.observation_space[self.train_start_idx + agent_id].shape)
+            self.obs_dim = reduce(lambda x, y: x*y, obs_shape)
+            if self.task_type=="attack":
+                self.obs_dim+=3*(self.n_defenders+self.available_npc_bubble)
+
+            self.share_obs_dim = self.obs_dim * self.n_agents if self.use_centralized_V else self.obs_dim
+            self.new_observation_space.append(gym.spaces.Box(low=-1e10, high=1e10, shape=(self.obs_dim,)))
+            self.share_observation_space.append(gym.spaces.Box(low=-1e10, high=1e10, shape=(self.share_obs_dim,)))
+            self.new_action_space.append(self.action_space[self.train_start_idx + agent_id])
+        
+        self.observation_space = self.new_observation_space
+        self.action_space = self.new_action_space
+        self.cache_frames = []
 
     def render_vulnerability(self, end_idx, T = 10):
         '''

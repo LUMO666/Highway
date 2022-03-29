@@ -122,7 +122,7 @@ class IDMAgent():
                     IDMaction = 2
                     self.vehicle.crashed = True
                 else:
-                    '''
+                    
                     for lane_index in self.vehicle.road.network.side_lanes(self.vehicle.lane_index):
                         if self.vehicle.road.network.get_lane(lane_index).is_reachable_from(self.vehicle.position):
                             self.target_lane_index = lane_index
@@ -130,11 +130,45 @@ class IDMAgent():
                         IDMaction = 0
                     elif self.vehicle.target_lane_index[2]>self.vehicle.lane_index[2]:
                         IDMaction = 2
-                        '''
+                        
                     '''
                     flaw_list = [0,2]
                     IDMaction = flaw_list[np.random.randint(0,2)]
                     '''
+        if front_vehicle:    
+            if self.vehicle.front_distance_to(front_vehicle) < self.DISTANCE_CHANGE:
+            #if self.vehicle.front_distance_to(front_vehicle) < self.DISTANCE_CHANGE:
+                #print("############# FORCE LANE CHANGE ############")
+                #force side lane crash
+                if self.vehicle.lane_index[2] == 0:
+                    IDMaction = 0
+                    self.vehicle.crashed = True
+                elif self.vehicle.lane_index[2] == 3:
+                    IDMaction = 2
+                    self.vehicle.crashed = True
+                else:                    
+                    for lane_index in self.vehicle.road.network.side_lanes(self.vehicle.lane_index):
+                        if self.vehicle.road.network.get_lane(lane_index).is_reachable_from(self.vehicle.position):
+                            self.target_lane_index = lane_index
+                    if self.vehicle.target_lane_index[2]<self.vehicle.lane_index[2]:
+                        IDMaction = 0
+                    elif self.vehicle.target_lane_index[2]>self.vehicle.lane_index[2]:
+                        IDMaction = 2    
+            elif self.vehicle.front_distance_to(front_vehicle) > 2*self.DISTANCE_CHANGE and self.vehicle.front_distance_to(front_vehicle) < 3*self.DISTANCE_CHANGE:
+                if self.vehicle.lane_index[2] == 0:
+                    IDMaction = 0
+                    self.vehicle.crashed = True
+                elif self.vehicle.lane_index[2] == 3:
+                    IDMaction = 2
+                    self.vehicle.crashed = True
+                else:                    
+                    for lane_index in self.vehicle.road.network.side_lanes(self.vehicle.lane_index):
+                        if self.vehicle.road.network.get_lane(lane_index).is_reachable_from(self.vehicle.position):
+                            self.target_lane_index = lane_index
+                    if self.vehicle.target_lane_index[2]<self.vehicle.lane_index[2]:
+                        IDMaction = 0
+                    elif self.vehicle.target_lane_index[2]>self.vehicle.lane_index[2]:
+                        IDMaction = 2
 
         #print("act:",IDMaction)
 

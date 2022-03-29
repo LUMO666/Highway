@@ -55,6 +55,9 @@ class Runner(object):
         self.use_diayn = self.all_args.use_diayn
         self.n_skills = self.all_args.diayn_skills
 
+        #rspo
+        self.use_rspo = self.all_args.use_rspo
+
         if self.use_wandb:
             self.save_dir = str(wandb.run.dir)
             self.run_dir = str(wandb.run.dir)
@@ -159,13 +162,16 @@ class Runner(object):
         raise NotImplementedError
     
     @torch.no_grad()
-    def compute(self):
+    def compute(self,eps=None):
         self.trainer.prep_rollout()
         next_values = self.trainer.policy.get_values(np.concatenate(self.buffer.share_obs[-1]),
                                                 np.concatenate(self.buffer.rnn_states_critic[-1]),
                                                 np.concatenate(self.buffer.masks[-1]))
         next_values = np.array(np.split(_t2n(next_values), self.n_rollout_threads))
-        self.buffer.compute_returns(next_values, self.trainer.value_normalizer)
+        if self.use_rspo:
+            self.buffer.compute_returns(next_values, self.trainer.value_normalizer, eps=eps)
+        else:
+            self.buffer.compute_returns(next_values, self.trainer.value_normalizer)
     #diayn discriminator reward calculation
     def discriminator_calculate(self,state):
         return self.policy.discriminator_calculate(state)

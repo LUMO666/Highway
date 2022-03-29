@@ -12,7 +12,7 @@ otheragentpolicypath="/home/tsing89/Highway/onpolicy/envs/highway/agents/policy_
 algo="rmappo"
 
 #exp="${otheragenttype}def_seed${seed}_${n_attackers}att_1029_dis006"
-exp="diayn_test"
+exp="diayn_test_all0"
 
 username="liuwl"
 ulimit -n 22222

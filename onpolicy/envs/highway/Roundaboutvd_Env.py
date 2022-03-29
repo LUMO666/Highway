@@ -275,6 +275,7 @@ class RoundaboutvdEnv(gym.core.Wrapper):
     def step(self, action):
         if not np.all(action == np.ones((self.n_agents, 1)).astype(np.int) * (-1)):
             self.render()
+            action = [[1]]
             # we need to get actions of other agents
             if self.n_other_agents > 0:
                 if self.other_agent_type == "vi":

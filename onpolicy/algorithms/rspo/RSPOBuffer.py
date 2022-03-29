@@ -130,11 +130,11 @@ class RSPOCore():
                             wandb.log({f"main_div{i}_{len(self)}": div / (right + 1 - left)})
                             wandb.log({f"ran_div{i}_{len(self)}": ran_div / (right + 1 - left)})
                             wandb.log({f"cur_div{i}_{len(self)}": cur_div / (right + 1 - left)})
-                        if self.all_args.tracker is not None:
-                            self.all_args.tracker.track(f"thre_alpha{i}_{len(self)}", div / ran_div)
-                            self.all_args.tracker.track(f"main_div{i}_{len(self)}", div / (right + 1 - left))
-                            self.all_args.tracker.track(f"ran_div{i}_{len(self)}", ran_div / (right + 1 - left))
-                            self.all_args.tracker.track(f"cur_div{i}_{len(self)}", cur_div / (right + 1 - left))
+                        #if self.all_args.tracker is not None:
+                            #self.all_args.tracker.track(f"thre_alpha{i}_{len(self)}", div / ran_div)
+                            #self.all_args.tracker.track(f"main_div{i}_{len(self)}", div / (right + 1 - left))
+                            #self.all_args.tracker.track(f"ran_div{i}_{len(self)}", ran_div / (right + 1 - left))
+                            #self.all_args.tracker.track(f"cur_div{i}_{len(self)}", cur_div / (right + 1 - left))
 
                         ce = self.minus_cross_entropy * cur_div
                         if (div - ce < self.thre_alpha * (ran_div - ce)
@@ -157,16 +157,16 @@ class RSPOCore():
             wandb.log({f"acceptance_{len(self)}": acceptance.mean()})
             for i in range(len(self)):
                 wandb.log({f"mean{i}_{len(self)}": self.runner_acceptance[i].get()})
-        if self.all_args.tracker is not None:
-            self.all_args.tracker.track(f"acceptance_{len(self)}", acceptance.mean())
-            for i in range(len(self)):
-                self.all_args.tracker.track(f"mean{i}_{len(self)}", self.runner_acceptance[i].get())
+        #if self.all_args.tracker is not None:
+        #    self.all_args.tracker.track(f"acceptance_{len(self)}", acceptance.mean())
+        #    for i in range(len(self)):
+        #        self.all_args.tracker.track(f"mean{i}_{len(self)}", self.runner_acceptance[i].get())
 
         return threshold, acceptance
         # (n_old, step, n_threads, num_agent, 1), (step, n_threads, num_agent, 1)
 
     # compute intrinsic reward
-    def rspo_reward(self, rewards, masks, actions_log_prob):  # (step, n_threads, num_agents, 1)
+    def rspo_reward(self, rewards, masks, actions_log_prob, eps=None):  # (step, n_threads, num_agents, 1)
         if len(self) == 0:
             return rewards
         # compute external rewards
@@ -185,11 +185,12 @@ class RSPOCore():
             wandb.log({f"average_step_reward_{len(self)}": rewards[:, 0, 0].mean()})
             wandb.log({f"external_{len(self)}": ext_rewards[:, 0, 0].mean()})
             wandb.log({f"internal_{len(self)}": self.lambda_factor * int_rewards[:, 0, 0].mean()})
-        if self.all_args.tracker is not None:
-            self.all_args.tracker.track(f"average_step_reward_{len(self)}", rewards[:, 0, 0].mean())
-            self.all_args.tracker.track(f"external_{len(self)}", ext_rewards[:, 0, 0].mean())
-            self.all_args.tracker.track(f"internal_{len(self)}", self.lambda_factor * int_rewards[:, 0, 0].mean())
-        rspo_rewards = ext_rewards + self.lambda_factor * int_rewards
+        #if self.all_args.tracker is not None:
+        #    self.all_args.tracker.track(f"average_step_reward_{len(self)}", rewards[:, 0, 0].mean())
+        #    self.all_args.tracker.track(f"external_{len(self)}", ext_rewards[:, 0, 0].mean())
+        #    self.all_args.tracker.track(f"internal_{len(self)}", self.lambda_factor * int_rewards[:, 0, 0].mean())
+        rspo_rewards = ext_rewards + eps*self.lambda_factor * int_rewards
+        print("ext_rewards:",ext_rewards," | int_rewards:", self.lambda_factor * int_rewards)
         return rspo_rewards
 
     def __len__(self):
@@ -226,8 +227,8 @@ class RSPOBuffer(SharedReplayBuffer):
                                        available_actions=None)
 
     # with rspo rewards
-    def compute_returns(self, next_value, value_normalizer=None):
-        rewards = self.rspo_core.rspo_reward(self.rewards, self.masks, self.action_log_probs)
+    def compute_returns(self, next_value, value_normalizer=None, eps=None):
+        rewards = self.rspo_core.rspo_reward(self.rewards, self.masks, self.action_log_probs, eps=eps)
         if self._use_proper_time_limits:
             if self._use_gae:
                 self.value_preds[-1] = next_value
