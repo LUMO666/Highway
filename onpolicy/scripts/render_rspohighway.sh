@@ -7,9 +7,9 @@ n_attackers=2
 
 n_dummies=0
 algo="rmappo"
-exp="rspohighway_test_lambda005_IDM_5v"
+exp="rspohighway_test_lambda005_IDM_5v_shapedfactor"
 seed_max=1
-model_dir="/home/tsing89/Highway/onpolicy/scripts/results/Highway/highway-v0/rmappo/rspohighway_test_lambda005_IDM_5v/wandb/run-20220317_032155-11znj87a/files"
+model_dir="/home/tsing89/Highway/onpolicy/scripts/results/Highway/highway-v0/rmappo/rspohighway_test_lambda005_IDM_5v_shapedfactor/wandb/run-20220324_215230-3st5beo7/files"
 
 echo "env is ${env}"
 for seed in `seq ${seed_max}`

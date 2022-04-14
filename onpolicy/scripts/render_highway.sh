@@ -9,7 +9,7 @@ n_dummies=0
 algo="rmappo"
 exp="videf"
 seed_max=1
-model_dir="/home/tsing89/Highway/onpolicy/scripts/results/Highway/highway-v0/rmappo/rspohighway_test_lambda05/wandb/run-20220119_092516-wj4si854/files"
+model_dir="/home/tsing89/Highway/onpolicy/scripts/results/Highway/highway-v0/rmappo/rspohighway_test_lambda005_IDM_5v_shapedfactor/wandb/run-20220324_215230-3st5beo7/files"
 
 echo "env is ${env}"
 for seed in `seq ${seed_max}`
